@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8146a0b3-54eb-45c6-ace8-07a1e6e6d4bf" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CompilerWorkspaceConfiguration">
+    <option name="MAKE_PROJECT_ON_SAVE" value="true" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Interface" />
+      </list>
+    </option>
+  </component>
+  <component name="JRebelWorkspace">
+    <option name="jrebelEnabledAutocompile" value="true" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="D:\JAVA_SPACE\JAVA_IDE\ideaIU-2020.2\plugins\maven\lib\maven3" />
+        <option name="userSettingsFile" value="D:\JAVA_SPACE\JAVA_TOOL\apache-maven-3.2.1\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="vmOptionsForImporter" value="-Xmx768m" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2biLUN4NDHgpUPRIL95PGKiuNgw" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showScratchesAndConsoles" value="false" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;1.8&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/JAVA_WORKSPACE/idea-workspace/2024/0204-AUC-1410&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;File.Encoding&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RebelAgentSelection">
+    <selection>jr</selection>
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\JAVA_WORKSPACE\idea-workspace\webconfig-springboot\webconfig-demo\webconfig-service2\src\main\java" />
+      <recent name="E:\JAVA_WORKSPACE\idea-workspace\webconfig-springboot\webconfig-demo\webconfig-application\src\main\resources" />
+      <recent name="E:\JAVA_WORKSPACE\idea-workspace\webconfig-springboot\webconfig-starter\src\main\resources" />
+      <recent name="E:\JAVA_WORKSPACE\idea-workspace\webconfig-springboot\webconfig-starter\src\main\resources\META-ANF" />
+      <recent name="E:\JAVA_WORKSPACE\idea-workspace\webconfig-springboot\webconfig-dubbo3\src\main\resources" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\JAVA_WORKSPACE\idea-workspace\webconfig-springboot\webconfig-demo\webconfig-service2\src\main" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.simonkingws.feign.service1" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.simonkingws.service2.impl" />
+      <recent name="com.simonkingws.service.demos.service.impl" />
+      <recent name="com.simonkingws.api.service2" />
+      <recent name="com.simonkingws.dubbo3.filter" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.WebconfigApplication">
+    <configuration name="LocalCacheUtil" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.simonkingws.webconfig.core.util.LocalCacheUtil" />
+      <module name="webconfig-spring-boot-starter" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WebconfigCoreSpringBootStarterApplicationTests.contextLoads (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="webconfig-spring-boot-starter" />
+      <option name="PACKAGE_NAME" value="com.simonkingws.webconfig.core" />
+      <option name="MAIN_CLASS_NAME" value="com.simonkingws.webconfig.core.WebconfigCoreSpringBootStarterApplicationTests" />
+      <option name="METHOD_NAME" value="contextLoads" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WebconfigApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="webconfig-application" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.simonkingws.application.WebconfigApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WebconfigService2Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="webconfig-service2" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.simonkingws.service2.WebconfigService2Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WebconfigServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="webconfig-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.simonkingws.service.WebconfigServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.LocalCacheUtil" />
+      <item itemvalue="JUnit.WebconfigCoreSpringBootStarterApplicationTests.contextLoads (1)" />
+      <item itemvalue="Spring Boot.WebconfigApplication" />
+      <item itemvalue="Spring Boot.WebconfigService2Application" />
+      <item itemvalue="Spring Boot.WebconfigServiceApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.WebconfigApplication" />
+        <item itemvalue="Spring Boot.WebconfigServiceApplication" />
+        <item itemvalue="Spring Boot.WebconfigService2Application" />
+        <item itemvalue="Application.LocalCacheUtil" />
+        <item itemvalue="JUnit.WebconfigCoreSpringBootStarterApplicationTests.contextLoads (1)" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8146a0b3-54eb-45c6-ace8-07a1e6e6d4bf" name="Changes" comment="" />
+      <created>1706692970450</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1706692970450</updated>
+      <workItem from="1706692972603" duration="19991000" />
+      <workItem from="1706768955389" duration="73132000" />
+      <workItem from="1707037281219" duration="3912000" />
+      <workItem from="1707041911958" duration="1362000" />
+      <workItem from="1707094033775" duration="5348000" />
+      <workItem from="1707099468450" duration="118000" />
+      <workItem from="1707099825659" duration="208000" />
+      <workItem from="1707120046643" duration="4378000" />
+      <workItem from="1707124446748" duration="2713000" />
+      <workItem from="1707127357114" duration="22650000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-field">
+          <url>file://$PROJECT_DIR$/webconfig-dubbo3/src/main/java/com/simonkingws/webconfig/dubbo3/filter/comsumer/DubboLocalContextComsumer.java</url>
+          <line>17</line>
+          <properties field="requestContextLocalPostProcess" class="com.simonkingws.webconfig.dubbo3.filter.comsumer.DubboLocalContextComsumer" />
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="org.apache.dubbo.rpc.RpcServiceContext" memberName="arguments" />
+        <PinnedItemInfo parentTag="org.apache.dubbo.rpc.model.ConsumerModel" memberName="apps" />
+      </pinned-members>
+    </pin-to-top-manager>
+  </component>
+</project>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.simonkingws.demo</groupId>
+    <artifactId>webconfig-demo</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>webconfig-demo</name>
+    <description>webconfig-demo</description>
+    <packaging>pom</packaging>
+
+    <properties>
+        <webconfig-api.version>0.0.1-SNAPSHOT</webconfig-api.version>
+        <webconfig-service.version>0.0.1-SNAPSHOT</webconfig-service.version>
+        <webconfig-service2.version>0.0.1-SNAPSHOT</webconfig-service2.version>
+
+        <webconfig-dubbo3.version>1.0.0-SNAPSHOT</webconfig-dubbo3.version>
+        <webconfig-feign.version>1.0.0-SNAPSHOT</webconfig-feign.version>
+        <webconfig-feign.version>1.0.0-SNAPSHOT</webconfig-feign.version>
+        <webconfig-starter.version>1.0.0-SNAPSHOT</webconfig-starter.version>
+
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven-compiler.version>3.8.1</maven-compiler.version>
+        <spring-boot.version>2.6.13</spring-boot.version>
+        <spring-cloud.version>2021.0.5</spring-cloud.version>
+    </properties>
+
+    <modules>
+        <module>webconfig-application</module>
+        <module>webconfig-api</module>
+        <module>webconfig-service</module>
+        <module>webconfig-service2</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.simonkingws.api</groupId>
+                <artifactId>webconfig-api</artifactId>
+                <version>${webconfig-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.simonkingws.service</groupId>
+                <artifactId>webconfig-service</artifactId>
+                <version>${webconfig-service.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.simonkingws.service2</groupId>
+                <artifactId>webconfig-service2</artifactId>
+                <version>${webconfig-service2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.simonkingws</groupId>
+                <artifactId>webconfig-dubbo3</artifactId>
+                <version>${webconfig-dubbo3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.simonkingws</groupId>
+                <artifactId>webconfig-feign</artifactId>
+                <version>${webconfig-feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.simonkingws</groupId>
+                <artifactId>webconfig-spring-boot-starter</artifactId>
+                <version>${webconfig-starter.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

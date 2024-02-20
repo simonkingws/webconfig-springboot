@@ -26,6 +26,9 @@
 * feign调用下的全局参数
 * Date参数传递时差问题统一处理
 
+### webconfig-demo
+* 应用实例以及case
+
 ### 使用说明
 
 TODO

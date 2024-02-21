@@ -2,7 +2,7 @@
 
 ### 1、webconfig-spring-boot-starter
 #### 1.1 依赖引入
-> 由于项目母目前未发布到中央仓库，需要将项目打包到本地仓库，方能使用。未来考虑发布到中央仓库
+> 由于项目目前未发布到中央仓库，需要将项目打包到本地仓库，方能使用。未来考虑发布到中央仓库
 #### 1.2 接口统一返回
 引入项目之后默认提供统一返回结果集：```com.simonkingws.webconfig.common.core.JsonResult```
 ```json

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -25,7 +26,7 @@ public class RequestHolder {
 
     private RequestHolder() {}
 
-    private static final ThreadLocal<RequestContextLocal> THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<RequestContextLocal> THREAD_LOCAL = new InheritableThreadLocal<>();
 
     public static void add(RequestContextLocal requestContextLocal) {
         THREAD_LOCAL.set(requestContextLocal);
@@ -37,33 +38,42 @@ public class RequestHolder {
 
     public static void remove(RequestContextLocalPostProcess requestContextLocalPostProcess) {
         final RequestContextLocal local = THREAD_LOCAL.get();
+        if (local != null) {
+            local.setTraceEndMs(Instant.now().toEpochMilli());
+        }
         THREAD_LOCAL.remove();
 
         // 异步处理链路数据
         CompletableFuture.runAsync(() -> {
-            if (requestContextLocalPostProcess != null) {
-                RequestContextLocal finalLocal = local;
-                if (finalLocal != null) {
-                    try {
-                        String traceId = finalLocal.getTraceId();
-                        if (StringUtils.isNotBlank(traceId)) {
-                            String requestContextLocalJson = stringRedisTemplate.opsForValue().get(traceId);
-                            if (StringUtils.isNotBlank(requestContextLocalJson)) {
-                                finalLocal = JSON.parseObject(requestContextLocalJson, RequestContextLocal.class);
-                            }
+            if (local != null) {
+                String traceId = local.getTraceId();
+                try {
+                    RequestContextLocal finalLocal = local;
+                    if (StringUtils.isNotBlank(traceId)) {
+                        // 重置MDC
+                        MDC.put(MDCKey.TRACEID, traceId);
 
-                            // 清除缓存的的链路数据
-                            stringRedisTemplate.delete(traceId);
-
-                            // 重置MDC
-                            MDC.put(MDCKey.TRACEID, traceId);
+                        String requestContextLocalJson = stringRedisTemplate.opsForValue().get(traceId);
+                        if (StringUtils.isNotBlank(requestContextLocalJson)) {
+                            finalLocal = JSON.parseObject(requestContextLocalJson, RequestContextLocal.class);
                         }
-                    }catch (Exception e){
-                        log.info("redis未配置或reids服务没有启动或反序列化异常：", e);
+
+                        // 清除缓存的的链路数据
+                        stringRedisTemplate.delete(traceId);
+                    }
+
+                    // 调用销毁的方法
+                    if (requestContextLocalPostProcess != null) {
+                        requestContextLocalPostProcess.destroy(finalLocal);
+                    }
+                }catch (Exception e){
+                    log.info("redis未配置或reids服务没有启动或反序列化异常：", e);
+                }finally {
+                    // 清除MDC的key
+                    if (StringUtils.isNotBlank(traceId)) {
+                        MDC.remove(traceId);
                     }
                 }
-
-                requestContextLocalPostProcess.destroy(finalLocal);
             }
         });
     }

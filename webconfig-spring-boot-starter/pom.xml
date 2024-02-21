@@ -5,14 +5,15 @@
     <parent>
         <groupId>com.simonkingws</groupId>
         <artifactId>webconfig-springboot</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>webconfig-spring-boot-starter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>webconfig-spring-boot-starter</name>
     <description>web 通用配置</description>
     <packaging>jar</packaging>
+    <url>https://github.com/simonkingws/webconfig-springboot</url>
 
     <dependencies>
         <dependency>

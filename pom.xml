@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.simonkingws</groupId>
     <artifactId>webconfig-springboot</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <properties>
         <!-- 项目版本管理 -->
-        <webconfig-common.version>1.0.0-SNAPSHOT</webconfig-common.version>
-        <webconfig-dubbo3.version>1.0.0-SNAPSHOT</webconfig-dubbo3.version>
-        <webconfig-feign.version>1.0.0-SNAPSHOT</webconfig-feign.version>
+        <webconfig-common.version>1.0.0</webconfig-common.version>
+        <webconfig-dubbo3.version>1.0.0</webconfig-dubbo3.version>
+        <webconfig-feign.version>1.0.0</webconfig-feign.version>
 
         <!-- 框架版本管理 -->
         <maven.compiler.source>8</maven.compiler.source>

@@ -5,12 +5,14 @@
     <parent>
         <groupId>com.simonkingws</groupId>
         <artifactId>webconfig-springboot</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>webconfig-feign</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>webconfig-feign</name>
     <description>webconfig-feign</description>
+    <packaging>jar</packaging>
+    <url>https://github.com/simonkingws/webconfig-springboot</url>
 
     <dependencies>
         <dependency>

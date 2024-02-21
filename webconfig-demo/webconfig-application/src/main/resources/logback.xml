@@ -18,7 +18,7 @@
 	<!-- 控制台输出 -->
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%logger：日志名，%line：日志打印行号，%msg：日志消息，%n：是换行符-->
+			<!--格式化输出：%d表示日期，%thread表示线程名，traceId标识链路标识，%-5level：级别从左显示5个字符宽度，%logger：日志名，%line：日志打印行号，%msg：日志消息，%n：是换行符-->
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId:%X{traceId}] %-5level %logger{100}[%line] - %msg%n</pattern>
 		</encoder>
 	</appender>

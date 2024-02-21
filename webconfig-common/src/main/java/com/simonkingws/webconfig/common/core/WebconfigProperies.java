@@ -18,7 +18,7 @@ public class WebconfigProperies {
     /**
      * 重复请求的缓存模式
      */
-    private String requestLimitCacheMode = "local";
+    private String requestLimitCacheMode = "redis";
 
     /**
      * 是否开启检验参数完成后返回所有错误信息，默认一个参数异常就返回
@@ -34,6 +34,7 @@ public class WebconfigProperies {
      * 全局请求参数拦截路径
      */
     private String interceptorPathPatterns = "/**";
+
     /**
      * 全局请求参数忽略路径
      */

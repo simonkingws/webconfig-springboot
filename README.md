@@ -1,5 +1,8 @@
 # webconfig-springboot 说明
 
+### 开发环境
+JDK1.8+，redis，springboot2.x，dubbo3.x
+
 ### 解决的问题
 
 `Springboot`项目的出现，帮我们解决了搭建项目的各种依赖配置等问题，使我们能够快速搭建一个web项目并且能够跑起来，极大的简化了项目的搭建。

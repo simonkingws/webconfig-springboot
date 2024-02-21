@@ -54,6 +54,7 @@ public class RequestContextLocal implements Serializable {
      *  链路起始时间
      */
     private Long traceStartMs;
+
     /**
      *  链路结束时间
      */

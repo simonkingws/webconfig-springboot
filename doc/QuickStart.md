@@ -143,7 +143,7 @@ public interface GlobalExceptionResponseResolver {
 * get()：从当前线程中获取`RequestContextLocal`信息
 * remove(): 线程结束后清空当前线程的的数据，防止内存溢出，拦截器已经自动设置
 
-##### 1.6.4 拦截器的封装请求参数的后置处理
+##### 1.6.4 请求参数的后置处理
 后置处理类：`com.simonkingws.webconfig.common.process.RequestContextLocalPostProcess`
 ```java
 public interface RequestContextLocalPostProcess {
@@ -286,7 +286,7 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 * 通过`feign.RequestTemplate`将`RequestHeader`参数和上下文参数`RequestContextLocal`交互
 * 所有的数据都是放在请求头里面的
 
-#### 3.2 Feign接口Date参数传递时差问题统一处理
+#### 3.2 日期参数传递的时差问题处理
 自定义Formatter，将日期转化成字符串`yyyy-MM-dd HH:mm:ss`，这和`1.4 统一日期的处理`对应，否则会出问题。
 
 支持的日期类型：
@@ -296,7 +296,7 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 ### 4、更新日志
 
 #### v1.0.0 @2024-02-22
-* [优化]使用Validator校验参数是，配置快速失败。只要有一个字段校验不通过就返回，否则校验全部字段。
+* [优化]使用Validator校验参数时，配置快速失败。只要有一个字段校验不通过就返回，否则校验全部字段。
 * [优化]更新文档 
 
 #### v1.0.0 @2024-02-21

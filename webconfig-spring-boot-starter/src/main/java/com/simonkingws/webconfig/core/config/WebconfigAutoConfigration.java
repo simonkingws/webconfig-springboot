@@ -4,14 +4,20 @@ import com.simonkingws.webconfig.common.constant.SymbolConstant;
 import com.simonkingws.webconfig.common.core.WebconfigProperies;
 import com.simonkingws.webconfig.core.Interceptor.RequestContextInterceptor;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
 
 /**
  * 自动装配
@@ -44,4 +50,16 @@ public class WebconfigAutoConfigration implements WebMvcConfigurer {
                 .order(Ordered.HIGHEST_PRECEDENCE);
     }
 
+    /**
+     * Validator 校验快速失败配置
+     */
+    @Override
+    public Validator getValidator() {
+        ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class)
+                .configure()
+                .failFast(webconfigProperies.getValidFailFast())
+                .buildValidatorFactory();
+
+        return new SpringValidatorAdapter(validatorFactory.getValidator());
+    }
 }

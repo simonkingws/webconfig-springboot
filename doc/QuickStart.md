@@ -226,6 +226,51 @@ public interface CacheResolver {
 }
 ```
 
+#### 1.8 配置类
+`com.simonkingws.webconfig.common.core.WebconfigProperies`
+```java
+public class WebconfigProperies {
+
+    /**
+     * 重复请求的缓存模式
+     */
+    private String requestLimitCacheMode = "redis";
+
+    /**
+     * 是否开启检验参数完成后返回所有错误信息，默认一个参数异常就返回
+     */
+    private Boolean validFailFast = true;
+
+    /**
+     * 是否开启全局请求参数拦截
+     */
+    private Boolean requestContextInterceptor = true;
+
+    /**
+     * 全局请求参数拦截路径
+     */
+    private String interceptorPathPatterns = "/**";
+
+    /**
+     * 全局请求参数忽略路径
+     */
+    private String excludePathPatterns;
+
+    /**
+     * 是否开启dubbo全局请求参数拦截
+     */
+    private Boolean dubboInterceptor = true;
+
+    /**
+     * 是否开启Feign全局请求头参数拦截
+     */
+    private Boolean feignInterceptor = true;
+
+}
+```
+> 配置类的前缀为`springboot.webconfig`,可以在配置文件中自行配置。大部分配置类有默认值，用户可以通过配置自行修改。
+
+
 ### 2、webconfig-dubbo3
 主要通过dubbo3传递全局参数。
 #### 2.1 dubbo扩展Filter
@@ -249,6 +294,11 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 * java.time.LocalDateTime 兼容jdk8
 
 ### 4、更新日志
+
+#### v1.0.0 @2024-02-22
+* [优化]使用Validator校验参数是，配置快速失败。只要有一个字段校验不通过就返回，否则校验全部字段。
+* [优化]更新文档 
+
 #### v1.0.0 @2024-02-21
 * 第一版上传至github
 * [新增]webconfig-spring-boot-starter项目

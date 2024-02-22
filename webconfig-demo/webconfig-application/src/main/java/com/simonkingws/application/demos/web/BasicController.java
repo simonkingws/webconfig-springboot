@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -32,7 +33,7 @@ public class BasicController {
      * 测试Form表单提交
      */
     @RequestMapping("/testFormData")
-    public String testFormData(@Validated Book book){
+    public String testFormData(@Valid Book book){
         System.out.println(book);
         System.out.println(DateTimeFormatter.ofPattern(DateFormatConstant.STANDARD_DATE_TIME).format(book.getFinishDateTime()));
         return "success";

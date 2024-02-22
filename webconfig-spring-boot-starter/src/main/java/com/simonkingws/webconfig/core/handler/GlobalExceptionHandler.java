@@ -5,7 +5,6 @@ import com.simonkingws.webconfig.common.core.WebconfigProperies;
 import com.simonkingws.webconfig.common.exception.WebConfigException;
 import com.simonkingws.webconfig.core.resolver.GlobalExceptionResponseResolver;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
@@ -114,13 +113,9 @@ public class GlobalExceptionHandler {
     private String getErrorMsgDefault(List<FieldError> fieldErrors, String detaultMsg) {
         String errorMsg = null;
         if (!CollectionUtils.isEmpty(fieldErrors)) {
-            if (BooleanUtils.isTrue(webconfigProperies.getValidFailFast())) {
-                errorMsg = showErrorMsg(fieldErrors.get(0));
-            }else{
-                List<String> msgs = new ArrayList<>(fieldErrors.size());
-                fieldErrors.forEach(error -> msgs.add(showErrorMsg(error)));
-                errorMsg = String.join(";", msgs);
-            }
+            List<String> msgs = new ArrayList<>(fieldErrors.size());
+            fieldErrors.forEach(error -> msgs.add(showErrorMsg(error)));
+            errorMsg = String.join(";", msgs);
         }
         return Optional.ofNullable(errorMsg).orElse(detaultMsg);
     }

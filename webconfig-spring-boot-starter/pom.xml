@@ -13,7 +13,6 @@
     <name>webconfig-spring-boot-starter</name>
     <description>web 通用配置</description>
     <packaging>jar</packaging>
-    <url>https://github.com/simonkingws/webconfig-springboot</url>
 
     <dependencies>
         <dependency>

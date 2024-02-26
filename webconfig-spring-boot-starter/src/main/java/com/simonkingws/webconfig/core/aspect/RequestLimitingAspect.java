@@ -116,7 +116,7 @@ public class RequestLimitingAspect {
                 case RETURN_PAGE:
                     String redirect = requestLimiting.redirect();
                     log.info(">>>>>>重复请求返回页面：{}", redirect);
-                    response.sendRedirect(request.getContextPath()+redirect+"?&backUri="+request.getRequestURI());
+                    response.sendRedirect(request.getContextPath()+redirect+"?backUri="+request.getRequestURI());
                     break;
             }
         } catch (Throwable e) {

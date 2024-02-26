@@ -1,11 +1,17 @@
 package com.simonkingws.webconfig.core.handler;
 
+import com.alibaba.fastjson2.JSON;
+import com.simonkingws.webconfig.common.constant.TraceConstant;
+import com.simonkingws.webconfig.common.context.RequestContextLocal;
+import com.simonkingws.webconfig.common.context.TraceItem;
 import com.simonkingws.webconfig.common.core.JsonResult;
-import com.simonkingws.webconfig.common.core.WebconfigProperies;
 import com.simonkingws.webconfig.common.exception.WebConfigException;
+import com.simonkingws.webconfig.common.util.RequestHolder;
+import com.simonkingws.webconfig.common.util.SpringContextHolder;
 import com.simonkingws.webconfig.core.resolver.GlobalExceptionResponseResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -36,7 +42,7 @@ public class GlobalExceptionHandler {
     @Autowired(required = false)
     private GlobalExceptionResponseResolver globalExceptionResponseResolver;
     @Autowired
-    private WebconfigProperies webconfigProperies;
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 校验参数绑定异常
@@ -131,10 +137,30 @@ public class GlobalExceptionHandler {
      * @date 2024/1/31 10:43
      */
     private Object doGenerateResult(Exception e, String errorMsg) {
+        disposeExceptionTrace(errorMsg);
         if (globalExceptionResponseResolver != null) {
             globalExceptionResponseResolver.pushExceptionNotice(e, errorMsg);
             return globalExceptionResponseResolver.resolveExceptionResponse(e, errorMsg);
         }
         return JsonResult.ofFail(errorMsg);
+    }
+
+    private void disposeExceptionTrace(String errorMsg) {
+        try {
+            // 保存链路信息到redis, 链路太长容易引起性能问题
+            RequestContextLocal local = RequestHolder.get();
+            if (local != null) {
+                String applicationName = SpringContextHolder.getApplicationName();
+
+                TraceItem traceItem = TraceItem.copy2TraceItem(local);
+                traceItem.setConsumerApplicatName(applicationName);
+                traceItem.setProviderApplicatName(applicationName);
+                traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + errorMsg);
+
+                stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
+            }
+        }catch (Exception e){
+            log.warn("disposeExceptionTrace 异常：", e);
+        }
     }
 }

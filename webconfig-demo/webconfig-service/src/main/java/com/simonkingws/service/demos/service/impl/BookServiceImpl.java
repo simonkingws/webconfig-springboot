@@ -27,6 +27,7 @@ public class BookServiceImpl implements BookService {
     public String bookName(Integer bookId) {
         BigDecimal book2Price = book2Service.getBook2Price();
         log.info("book2Service.getBook2Price()=====> book2Price={}", book2Price);
+        int a = 1 / 0;
         return "<<侠客行>> --> bookId=" + bookId;
     }
 }

@@ -2,9 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>请求频繁</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手抖了</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        p {
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #337ab7;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: #23527c;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 20px;
+        }
+    </style>
 </head>
 <body>
-    少年， 你请求太频繁了！
+<h1>手抖了？</h1>
+<p>您的点击速度过快，上次请求结果还未返回，请稍后再试。</p>
+<img src="../../images/302.png" alt="手抖了">
+<a href="#" class="button" onclick="reloadPage()">返回</a>
+<script>
+    function reloadPage() {
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = window.location.origin + params.get('backUri') + "?&_r=" + Math.random();
+    }
+</script>
 </body>
 </html>

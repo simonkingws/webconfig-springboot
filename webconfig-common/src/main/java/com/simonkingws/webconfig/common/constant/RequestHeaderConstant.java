@@ -1,5 +1,8 @@
 package com.simonkingws.webconfig.common.constant;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * 请求头常量
  *
@@ -28,10 +31,6 @@ public interface RequestHeaderConstant {
      */
     String END_POS = "end-pos";
 
-    /**
-     *  链路轨迹
-     */
-    String TRACE_WALKING = "trace-walking";
 
     /**
      *  链路轨迹起始时间
@@ -58,5 +57,11 @@ public interface RequestHeaderConstant {
      */
     String TOKEN = "token";
 
-    String[] HEADERS = {TRACE_ID, TRACE_SUM, START_POS, END_POS, TRACE_WALKING, USER_ID, USER_NAME, USER_TYPE, TOKEN};
+    String[] HEADERS = {TRACE_ID, TRACE_SUM, START_POS, END_POS, USER_ID, USER_NAME, USER_TYPE, TOKEN};
+
+    /** 以下参数不传递：Fiegn请求标识*/
+    String FIEGN_MARK_KEY = "fiegn-request-mark";
+    Collection<String> FIEGN_MARK_VAL = Collections.singletonList("fiegn-request");
+    String FIEGN_METHOD_NAME = "fiegn-method-name";
+    String FIEGN_CONSUMER_APPLICATION_NAME = "fiegn-consumer-application-name";
 }

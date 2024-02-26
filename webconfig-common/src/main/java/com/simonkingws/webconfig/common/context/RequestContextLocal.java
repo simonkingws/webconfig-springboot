@@ -1,7 +1,6 @@
 package com.simonkingws.webconfig.common.context;
 
 import com.simonkingws.webconfig.common.constant.RequestHeaderConstant;
-import com.simonkingws.webconfig.common.util.SpringContextHolder;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,9 +25,14 @@ public class RequestContextLocal implements Serializable {
     private static final long serialVersionUID = 4038049315156683942L;
 
     /**
-     *  每次请求的唯一标识
+     *  每次请求链路的唯一标识
      */
     private String traceId;
+
+    /**
+     *  子链路的标识，也是子链路的开始时间：时间戳
+     */
+    private Long spanId;
 
     /**
      *  链路的条数
@@ -51,12 +55,12 @@ public class RequestContextLocal implements Serializable {
     private String traceWalking;
 
     /**
-     *  链路起始时间
+     *  总链路起始时间
      */
     private Long traceStartMs;
 
     /**
-     *  链路结束时间
+     *  总链路结束
      */
     private Long traceEndMs;
 
@@ -95,17 +99,14 @@ public class RequestContextLocal implements Serializable {
         String traceId = request.getHeader(RequestHeaderConstant.TRACE_ID);
         String traceSum = request.getHeader(RequestHeaderConstant.TRACE_SUM);
         String startPos = request.getHeader(RequestHeaderConstant.START_POS);
-        String traceWalking = request.getHeader(RequestHeaderConstant.TRACE_WALKING);
-        if (StringUtils.isBlank(traceWalking)) {
-            traceWalking = "([1]["+ SpringContextHolder.getApplicationName() +"][" + request.getRequestURL() + "])";
-        }
         String traceStartMs = request.getHeader(RequestHeaderConstant.TRACE_START_MS);
+
         RequestContextLocalBuilder builder = RequestContextLocal.builder()
                 .traceId(StringUtils.isNotBlank(traceId) ? traceId : UUID.randomUUID().toString())
-                .traceSum(StringUtils.isNotBlank(traceSum) ? Integer.parseInt(traceSum) : 1)
+                .spanId(Instant.now().toEpochMilli())
+                .traceSum(StringUtils.isNotBlank(traceSum) ? Integer.parseInt(traceSum) : 0)
+                .startPos(StringUtils.isNotBlank(startPos) ? startPos : request.getRequestURL().toString())
                 .endPos(request.getRequestURI())
-                .startPos(StringUtils.isNotBlank(startPos) ? startPos : request.getRequestURI())
-                .traceWalking(traceWalking)
                 .traceStartMs(StringUtils.isNotBlank(traceStartMs) ? Long.parseLong(traceStartMs) : Instant.now().toEpochMilli())
                 .userId(request.getHeader(RequestHeaderConstant.USER_ID))
                 .userName(request.getHeader(RequestHeaderConstant.USER_NAME))
@@ -141,9 +142,6 @@ public class RequestContextLocal implements Serializable {
         }
         if (StringUtils.isNotBlank(this.endPos)) {
             headers.put(RequestHeaderConstant.END_POS, Collections.singletonList(this.endPos));
-        }
-        if (StringUtils.isNotBlank(this.traceWalking)) {
-            headers.put(RequestHeaderConstant.TRACE_WALKING, Collections.singletonList(this.traceWalking));
         }
         if (this.traceStartMs != null) {
             headers.put(RequestHeaderConstant.TRACE_START_MS, Collections.singletonList(this.traceStartMs.toString()));

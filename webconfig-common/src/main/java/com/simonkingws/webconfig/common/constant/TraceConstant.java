@@ -10,6 +10,8 @@ public interface TraceConstant {
 
     /** 调用的方法名称 */
     String INVOKE_METHOND_NAME = "%s.%s()";
-    /** 链路追踪的名称 */
-    String INVOKE_TRACE = "->([%d][%s][%s])";
+    /** 链路追踪的名称: [序号][消费端服务名称][提供端服务名称][方法名称] */
+    String INVOKE_TRACE = "([%d][%s][%s][%s])";
+
+    String EXCEPTION_TRACE_PREFIX = "java.lang.Throwable" + SymbolConstant.COLON + SymbolConstant.SPACE;
 }

@@ -41,4 +41,11 @@ public interface SymbolConstant {
      * 等号
      */
     String CONNECTION = "&";
+
+    /** 箭头 */
+    String ARROW = "->";
+
+    /** 空格 */
+    String SPACE = " ";
+
 }

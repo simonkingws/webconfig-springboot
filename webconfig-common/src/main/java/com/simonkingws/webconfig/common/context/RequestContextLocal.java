@@ -89,6 +89,9 @@ public class RequestContextLocal implements Serializable {
      */
     private Map<String, String> extendContext;
 
+    /** 远程调用的方法名： 次参数传输不传递 */
+    private String rpcMethodName;
+
     /**
      * 从请求头中构建上线下文参数
      *

@@ -19,6 +19,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
 
 /**
  * 全局参数拦截器
@@ -29,6 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 @Component
 public class RequestContextInterceptor implements HandlerInterceptor {
+
+    private final ThreadLocal<TraceItem> traceItemThreadLocal = new ThreadLocal<>();
 
     @Autowired(required = false)
     private RequestContextLocalPostProcess requestContextLocalPostProcess;
@@ -47,31 +50,25 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         if (requestContextLocalPostProcess != null) {
             requestContextLocalPostProcess.afterRequestContextLocal(requestContextLocal);
         }
-        
+
+        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
+        if (!StringUtils.isBlank(feignMark)) {
+            String feignMethodName = request.getHeader(RequestHeaderConstant.FIEGN_METHOD_NAME);
+            String consumerApplicationName = request.getHeader(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME);
+            String applicationName = SpringContextHolder.getApplicationName();
+
+            TraceItem traceItem = TraceItem.copy2TraceItem(requestContextLocal);
+            traceItem.setConsumerApplicatName(consumerApplicationName);
+            traceItem.setProviderApplicatName(applicationName);
+            traceItem.setMethodName(feignMethodName);
+
+            traceItemThreadLocal.set(traceItem);
+
+            requestContextLocal.setRpcMethodName(feignMethodName);
+        }
+
         RequestHolder.add(requestContextLocal);
         MDC.put(MDCKey.TRACEID, requestContextLocal.getTraceId());
-
-        // 保存链路信息到redis, 链路太长容易引起性能问题
-        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
-        if (StringUtils.isNotBlank(feignMark)) {
-            try {
-                RequestContextLocal local = RequestHolder.get();
-                if (local != null) {
-                    String feignMethodName = request.getHeader(RequestHeaderConstant.FIEGN_METHOD_NAME);
-                    String consumerApplicationName = request.getHeader(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME);
-                    String applicationName = SpringContextHolder.getApplicationName();
-
-                    TraceItem traceItem = TraceItem.copy2TraceItem(local);
-                    traceItem.setConsumerApplicatName(consumerApplicationName);
-                    traceItem.setProviderApplicatName(applicationName);
-                    traceItem.setMethodName(feignMethodName);
-
-                    stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
-                }
-            }catch (Exception e){
-                log.warn("redis未配置或reids服务没有启动：", e);
-            }
-        }
 
         return true;
     }
@@ -82,6 +79,19 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         if (StringUtils.isBlank(feignMark)) {
             RequestHolder.remove(requestContextLocalPostProcess);
         }else{
+            // 保存链路信息到redis, 链路太长容易引起性能问题
+            try {
+                TraceItem traceItem = traceItemThreadLocal.get();
+                RequestContextLocal local = RequestHolder.get();
+                if (traceItem != null && local != null) {
+                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+
+                    stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
+                }
+            }catch (Exception e){
+                log.warn("redis未配置或reids服务没有启动：", e);
+            }
+
             RequestHolder.remove();
         }
         MDC.remove(MDCKey.TRACEID);

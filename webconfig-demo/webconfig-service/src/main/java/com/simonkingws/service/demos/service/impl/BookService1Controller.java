@@ -2,9 +2,11 @@ package com.simonkingws.service.demos.service.impl;
 
 import com.alibaba.fastjson2.util.DateUtils;
 import com.simonkingws.api.service.BookService1FeignClient;
+import com.simonkingws.api.service.FooService;
 import com.simonkingws.api.service2.Book2Service;
 import com.simonkingws.api.service2.BookService2FeignClient;
 import com.simonkingws.webconfig.common.constant.DateFormatConstant;
+import com.simonkingws.webconfig.core.annotation.InnerTrace;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,14 +25,19 @@ public class BookService1Controller implements BookService1FeignClient {
     private BookService2FeignClient bookService2FeignClient;
     @Autowired
     private Book2Service book2Service;
+    @Autowired
+    private FooService fooService;
 
     @Override
+    @InnerTrace
     public String bookName(Integer bookId) {
+        fooService.foo();
         BigDecimal book2Price = bookService2FeignClient.getBook2Price();
         log.info("bookService2FeignClient.getBook2Price()=====> book2Price={}", book2Price);
 //        BigDecimal book2Price = book2Service.getBook2Price();
 //        log.info("book2Service.getBook2Price()=====> book2Price={}", book2Price);
-        int a = 1 / 0;
+//        int a = 1 / 0;
+
         return "<<侠客行2>> --> bookId=" + bookId;
     }
 

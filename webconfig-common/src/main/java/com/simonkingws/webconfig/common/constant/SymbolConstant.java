@@ -48,4 +48,10 @@ public interface SymbolConstant {
     /** 空格 */
     String SPACE = " ";
 
+    /** 点号 */
+    String DOT = ".";
+
+    /** 括号 */
+    String BRACKET = "()";
+
 }

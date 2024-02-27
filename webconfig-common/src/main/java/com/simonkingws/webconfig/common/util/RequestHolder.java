@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -107,10 +108,12 @@ public class RequestHolder {
                         stringRedisTemplate.delete(traceId);
 
                         // 输出链路信息
+                        traceItemList.sort(Comparator.comparing(TraceItem::getOrder));
                         String traceWalking = getCompeleteTraceWalking(traceItemList);
-                        log.info("当前请求的完整的链路信息：{}", traceWalking);
+                        log.info("当前请求的完整的链路信息：{}", JSON.toJSONString(traceItemList));
 
                         local.setTraceWalking(traceWalking);
+                        local.setEndPos(traceItemList.get(traceItemList.size() - 1).getMethodName());
                     }
 
                     // 调用销毁的方法

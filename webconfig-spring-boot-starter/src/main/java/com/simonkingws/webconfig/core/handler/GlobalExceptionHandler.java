@@ -150,14 +150,22 @@ public class GlobalExceptionHandler {
             // 保存链路信息到redis, 链路太长容易引起性能问题
             RequestContextLocal local = RequestHolder.get();
             if (local != null) {
-                String applicationName = SpringContextHolder.getApplicationName();
+                List<String> range = stringRedisTemplate.opsForList().range(local.getTraceId(), 0, -1);
+                if (!CollectionUtils.isEmpty(range)) {
+                    long count = range.stream().map(item -> JSON.parseObject(item, TraceItem.class))
+                            .filter(item -> item.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX))
+                            .count();
+                    if (count == 0) {
+                        String applicationName = SpringContextHolder.getApplicationName();
 
-                TraceItem traceItem = TraceItem.copy2TraceItem(local);
-                traceItem.setConsumerApplicatName(applicationName);
-                traceItem.setProviderApplicatName(applicationName);
-                traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + errorMsg);
+                        TraceItem traceItem = TraceItem.copy2TraceItem(local);
+                        traceItem.setConsumerApplicatName(applicationName);
+                        traceItem.setProviderApplicatName(applicationName);
+                        traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + errorMsg);
 
-                stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
+                        stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
+                    }
+                }
             }
         }catch (Exception e){
             log.warn("disposeExceptionTrace 异常：", e);

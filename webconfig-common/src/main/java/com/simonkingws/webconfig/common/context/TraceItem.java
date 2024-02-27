@@ -27,7 +27,6 @@ public class TraceItem implements Serializable {
      */
     private Long spanId;
 
-
     /**
      *  子链路结束时间
      */
@@ -61,5 +60,4 @@ public class TraceItem implements Serializable {
                 .order(local.getTraceSum())
                 .build();
     }
-
 }

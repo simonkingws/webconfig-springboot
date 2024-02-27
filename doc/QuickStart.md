@@ -109,6 +109,7 @@ public interface GlobalExceptionResponseResolver {
 
 记录Header的主要信息：
 * 整个请求的链路标识：`traceId`
+* 整个请求的子链路标识：`spanId`
 * 整个请求的链路数：`traceSum`
 * 整个请求的链路轨迹：`traceWalking`
 * 第一次进入请求的时间：`traceStartMs`

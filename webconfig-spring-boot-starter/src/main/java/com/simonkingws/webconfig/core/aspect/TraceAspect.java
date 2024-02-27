@@ -47,13 +47,15 @@ public class TraceAspect {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         String methodName  = null;
         Class<?>[] interfaces = method.getDeclaringClass().getInterfaces();
-        for (Class<?> anInterface : interfaces) {
-            Method[] methods = anInterface.getMethods();
-            if (ArrayUtils.isNotEmpty(methods)) {
-                long count = Arrays.stream(methods).filter(m -> method.getName().equals(m.getName())).count();
-                if (count > 0) {
-                    methodName = anInterface.getName() + SymbolConstant.DOT + method.getName() + SymbolConstant.BRACKET;
-                    break;
+        if (ArrayUtils.isNotEmpty(interfaces)) {
+            for (Class<?> anInterface : interfaces) {
+                Method[] methods = anInterface.getMethods();
+                if (ArrayUtils.isNotEmpty(methods)) {
+                    long count = Arrays.stream(methods).filter(m -> method.getName().equals(m.getName())).count();
+                    if (count > 0) {
+                        methodName = anInterface.getName() + SymbolConstant.DOT + method.getName() + SymbolConstant.BRACKET;
+                        break;
+                    }
                 }
             }
         }

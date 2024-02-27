@@ -57,10 +57,14 @@ public class TraceAspect {
                 }
             }
         }
+        if (StringUtils.isBlank(methodName)) {
+            // 本地方法
+            methodName = method.getDeclaringClass().getName() + SymbolConstant.DOT + method.getName() + SymbolConstant.BRACKET;
+        }
         log.info("@InnerTrace[{}]>>>>>>开始处理>>>>>>>>>>", methodName);
 
         RequestContextLocal local = RequestHolder.get();
-        if (StringUtils.isBlank(methodName) || Optional.ofNullable(local).map(RequestContextLocal::getRpcMethodName).orElse("").equals(methodName)) {
+        if (Optional.ofNullable(local).map(RequestContextLocal::getRpcMethodName).orElse("").equals(methodName)) {
             return joinPoint.proceed();
         }
 

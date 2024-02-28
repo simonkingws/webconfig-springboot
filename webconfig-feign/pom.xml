@@ -8,7 +8,7 @@
         <version>1.0.0</version>
     </parent>
     <artifactId>webconfig-feign</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>webconfig-feign</name>
     <description>webconfig-feign</description>
     <packaging>jar</packaging>

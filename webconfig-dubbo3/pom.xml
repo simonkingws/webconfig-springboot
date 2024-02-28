@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>webconfig-dubbo3</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>webconfig-dubbo3</name>
     <description>webconfig-dubbo3</description>
     <packaging>jar</packaging>

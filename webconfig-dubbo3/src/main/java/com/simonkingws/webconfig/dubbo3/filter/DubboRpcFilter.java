@@ -50,8 +50,9 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
         if (rpcContext.isProviderSide()) {
             // 提供端：增加链路信息
             RpcContextAttachment serverAttachment = RpcContext.getServerAttachment();
-            RequestContextLocal local = (RequestContextLocal)serverAttachment.getObjectAttachment(RPC_CONTEXT_KEY);
-            if (local != null) {
+            Object objectAttachment = serverAttachment.getObjectAttachment(RPC_CONTEXT_KEY);
+            if (objectAttachment != null) {
+                RequestContextLocal local = (RequestContextLocal) objectAttachment;
                 log.info(">>>>>>>提供端：进入DubboRpcFilter，拦截[{}]方法被调用，将dubbo上下文的数据保存到本地上下文", invokeMethodName);
 
                 Integer traceSum = Optional.ofNullable(local.getTraceSum()).orElse(0);

@@ -14,8 +14,8 @@
         <webconfig-service.version>0.0.1-SNAPSHOT</webconfig-service.version>
         <webconfig-service2.version>0.0.1-SNAPSHOT</webconfig-service2.version>
 
-        <webconfig-dubbo3.version>1.0.0</webconfig-dubbo3.version>
-        <webconfig-feign.version>1.0.0</webconfig-feign.version>
+        <webconfig-dubbo3.version>1.0.1</webconfig-dubbo3.version>
+        <webconfig-feign.version>1.0.1</webconfig-feign.version>
         <webconfig-starter.version>1.0.1</webconfig-starter.version>
 
         <maven.compiler.source>8</maven.compiler.source>

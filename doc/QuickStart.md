@@ -229,6 +229,10 @@ public interface CacheResolver {
 }
 ```
 
+##### 1.7.2 内部链路追踪的注解
+`com.simonkingws.webconfig.core.annotation.InnerTrace`
+> 将`@InnerTrace`注解的方法，加入到链路信息中，主要用户服务内部方法调用。如果PRC的方法也被次注解修饰，则会忽略此注解
+
 #### 1.8 配置类
 `com.simonkingws.webconfig.common.core.WebconfigProperies`
 ```java
@@ -269,6 +273,11 @@ public class WebconfigProperies {
      */
     private Boolean feignInterceptor = true;
 
+    /**
+     * 是否开启链路信息采集
+     */
+    private Boolean openTraceCollect = false;
+
 }
 ```
 > 配置类的前缀为`springboot.webconfig`,可以在配置文件中自行配置。大部分配置类有默认值，用户可以通过配置自行修改。
@@ -297,6 +306,15 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 * java.time.LocalDateTime 兼容jdk8
 
 ### 4、更新日志
+
+### v1.0.1 @2024-02-28
+* [新增]`@InnerTrace`注解
+* [新增]全链路的信息采集的开关，默认false
+* [新增]链路异常信息采集
+* [优化]优化`webconfig-spring-boot-starter`的Threadlocal，并升级版本为1.0.1
+* [优化]dubbo3链路采集的方式，优化Threadlocal，并升级版本为1.0.1
+* [优化]feign链路采集的方式，并升级版本为1.0.1
+* [优化]更新文档
 
 #### v1.0.0 @2024-02-22
 * [优化]使用Validator校验参数时，配置快速失败。只要有一个字段校验不通过就返回，否则校验全部字段。

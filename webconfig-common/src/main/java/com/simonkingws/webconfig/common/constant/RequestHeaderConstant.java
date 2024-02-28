@@ -64,7 +64,7 @@ public interface RequestHeaderConstant {
 
     String[] HEADERS = {TRACE_ID, TRACE_SUM, START_POS, END_POS, USER_ID, USER_NAME, USER_TYPE, TOKEN, OPEN_TRACE_COLLECT};
 
-    /** 以下参数不传递：Fiegn请求标识*/
+    /** 以下参数不再ThreaLocal中传递：Fiegn请求标识*/
     String FIEGN_MARK_KEY = "fiegn-request-mark";
     Collection<String> FIEGN_MARK_VAL = Collections.singletonList("fiegn-request");
     String FIEGN_METHOD_NAME = "fiegn-method-name";

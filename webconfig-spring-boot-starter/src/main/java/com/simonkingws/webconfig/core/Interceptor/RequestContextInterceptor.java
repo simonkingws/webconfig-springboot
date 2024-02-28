@@ -66,15 +66,18 @@ public class RequestContextInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
-        if (StringUtils.isNotBlank(feignMark)) {
+        if (isRpcInvoke(request)) {
             collectTraceDataSave();
-            RequestHolder.remove();
         }else {
             RequestHolder.remove(requestContextLocalPostProcess);
         }
 
         MDC.remove(MDCKey.TRACEID);
+    }
+
+    private boolean isRpcInvoke(HttpServletRequest request) {
+        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
+        return StringUtils.isNotBlank(feignMark);
     }
 
     private void collectTraceDataSave() {
@@ -92,11 +95,12 @@ public class RequestContextInterceptor implements HandlerInterceptor {
                 log.warn("redis未配置或reids服务没有启动：", e);
             }
         }
+
+        RequestHolder.remove();
     }
 
     private void collectTraceData(HttpServletRequest request, RequestContextLocal requestContextLocal) {
-        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
-        if (StringUtils.isNotBlank(feignMark)) {
+        if (isRpcInvoke(request)) {
             log.info(">>>>>>构建链路信息>>>>>>>>>>>>>>>>>>>>");
             String feignMethodName = request.getHeader(RequestHeaderConstant.FIEGN_METHOD_NAME);
             String consumerApplicationName = request.getHeader(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME);

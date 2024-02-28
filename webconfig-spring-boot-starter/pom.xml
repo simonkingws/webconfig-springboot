@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>webconfig-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>webconfig-spring-boot-starter</name>
     <description>web 通用配置</description>
     <packaging>jar</packaging>

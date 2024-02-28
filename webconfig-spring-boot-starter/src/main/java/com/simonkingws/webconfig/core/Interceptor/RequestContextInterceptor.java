@@ -10,6 +10,7 @@ import com.simonkingws.webconfig.common.process.RequestContextLocalPostProcess;
 import com.simonkingws.webconfig.common.util.RequestHolder;
 import com.simonkingws.webconfig.common.util.SpringContextHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class RequestContextInterceptor implements HandlerInterceptor {
             requestContextLocalPostProcess.afterRequestContextLocal(requestContextLocal);
         }
 
-        if (webconfigProperies.getOpenTraceCollect()) {
+        if (BooleanUtils.isTrue(webconfigProperies.getOpenTraceCollect())) {
             // 采集链路信息
             collectTraceData(request, requestContextLocal);
         }
@@ -67,7 +68,7 @@ public class RequestContextInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
         if (StringUtils.isNotBlank(feignMark)) {
-            collectTraceDataAndSave(request);
+            collectTraceDataSave();
             RequestHolder.remove();
         }else {
             RequestHolder.remove(requestContextLocalPostProcess);
@@ -76,10 +77,9 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         MDC.remove(MDCKey.TRACEID);
     }
 
-    private void collectTraceDataAndSave(HttpServletRequest request) {
-        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
-        if (StringUtils.isNotBlank(feignMark)) {
-            // 保存链路信息到redis, 链路太长容易引起性能问题
+    private void collectTraceDataSave() {
+        // 保存链路信息到redis, 链路太长容易引起性能问题
+        if (BooleanUtils.isTrue(webconfigProperies.getOpenTraceCollect())) {
             try {
                 TraceItem traceItem = traceItemThreadLocal.get();
                 RequestContextLocal local = RequestHolder.get();
@@ -95,7 +95,8 @@ public class RequestContextInterceptor implements HandlerInterceptor {
     }
 
     private void collectTraceData(HttpServletRequest request, RequestContextLocal requestContextLocal) {
-        if (webconfigProperies.getOpenTraceCollect()) {
+        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
+        if (StringUtils.isNotBlank(feignMark)) {
             log.info(">>>>>>构建链路信息>>>>>>>>>>>>>>>>>>>>");
             String feignMethodName = request.getHeader(RequestHeaderConstant.FIEGN_METHOD_NAME);
             String consumerApplicationName = request.getHeader(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME);

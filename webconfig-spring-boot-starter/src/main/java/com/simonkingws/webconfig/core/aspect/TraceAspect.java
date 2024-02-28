@@ -9,6 +9,7 @@ import com.simonkingws.webconfig.common.util.RequestHolder;
 import com.simonkingws.webconfig.common.util.SpringContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * <code>@InnerTrace</code>的切面
@@ -44,6 +44,11 @@ public class TraceAspect {
 
     @Around("pointcut()")
     public Object Around(ProceedingJoinPoint joinPoint) throws Throwable {
+        RequestContextLocal local = RequestHolder.get();
+        if (local == null || BooleanUtils.isNotTrue(local.getOpenTraceCollect())) {
+            return joinPoint.proceed();
+        }
+
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         String methodName  = null;
         Class<?>[] interfaces = method.getDeclaringClass().getInterfaces();
@@ -65,53 +70,46 @@ public class TraceAspect {
         }
         log.info("@InnerTrace[{}]>>>>>>开始处理>>>>>>>>>>", methodName);
 
-        RequestContextLocal local = RequestHolder.get();
-        if (Optional.ofNullable(local).map(RequestContextLocal::getRpcMethodName).orElse("").equals(methodName)) {
+        // 判断该方法是不是Rpc调用的：如果是就忽略，rpc会自己采集
+        if (StringUtils.equals(methodName, local.getRpcMethodName())) {
             return joinPoint.proceed();
         }
 
+        // 采集来链路信息
+        String applicationName = SpringContextHolder.getApplicationName();
+        Integer traceSum = local.getTraceSum();
+        traceSum++;
+
+        local.setEndPos(methodName);
+        local.setTraceSum(traceSum);
+
+        TraceItem traceItem = TraceItem.copy2TraceItem(local);
+        traceItem.setConsumerApplicatName(applicationName);
+        traceItem.setProviderApplicatName(applicationName);
+        traceItem.setMethodName(methodName);
+
         Object proceed;
-        TraceItem traceItem = null;
         try {
-            if (local != null) {
-                Integer traceSum = local.getTraceSum();
-                traceSum++;
-
-                local.setEndPos(methodName);
-                local.setTraceSum(traceSum);
-
-                String applicationName = SpringContextHolder.getApplicationName();
-
-                traceItem = TraceItem.copy2TraceItem(local);
-                traceItem.setConsumerApplicatName(applicationName);
-                traceItem.setProviderApplicatName(applicationName);
-                traceItem.setMethodName(methodName);
-            }
-
             // 执行方法
             proceed = joinPoint.proceed();
 
             try {
-                if (local != null) {
-                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
-                    stringRedisTemplate.opsForList().leftPush(local.getTraceId(), JSON.toJSONString(traceItem));
-                }
+                traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+                stringRedisTemplate.opsForList().leftPush(local.getTraceId(), JSON.toJSONString(traceItem));
             }catch (Exception e){
                 log.warn("处理@InnerTrace注解异常：", e);
             }
         }catch (Throwable th){
-            // 保存链路信息到redis, 链路太长容易引起性能问题
+            // 有异常需要记录异常的链路信息，并将异常抛出
             try {
-                if (local != null && traceItem != null) {
-                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+                traceItem.setSpanEndMs(Instant.now().toEpochMilli());
 
-                    String traceId = local.getTraceId();
-                    stringRedisTemplate.opsForList().leftPush(traceId, JSON.toJSONString(traceItem));
+                String traceId = local.getTraceId();
+                stringRedisTemplate.opsForList().leftPush(traceId, JSON.toJSONString(traceItem));
 
-                    // 增肌异常信息的处理
-                    traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + th.getMessage());
-                    stringRedisTemplate.opsForList().rightPush(traceId, JSON.toJSONString(traceItem));
-                }
+                // 增肌异常信息的处理
+                traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + th.getMessage());
+                stringRedisTemplate.opsForList().rightPush(traceId, JSON.toJSONString(traceItem));
             }catch (Exception e){
                 log.warn("处理@InnerTrace注解异常：", e);
             }

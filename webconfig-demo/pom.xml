@@ -16,7 +16,7 @@
 
         <webconfig-dubbo3.version>1.0.0</webconfig-dubbo3.version>
         <webconfig-feign.version>1.0.0</webconfig-feign.version>
-        <webconfig-starter.version>1.0.0</webconfig-starter.version>
+        <webconfig-starter.version>1.0.1</webconfig-starter.version>
 
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>

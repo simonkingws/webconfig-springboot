@@ -113,7 +113,7 @@ public class RequestHolder {
                         // 输出链路信息
                         traceItemList.sort(Comparator.comparing(TraceItem::getOrder));
                         String traceWalking = getCompeleteTraceWalking(traceItemList);
-                        log.info("当前请求的完整的链路信息：{}", JSON.toJSONString(traceItemList));
+                        log.info("当前请求的完整的链路信息：{}", traceWalking);
 
                         local.setTraceWalking(traceWalking);
                         local.setEndPos(traceItemList.get(traceItemList.size() - 1).getMethodName());

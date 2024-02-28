@@ -65,10 +65,11 @@ public class RequestContextInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        if (webconfigProperies.getOpenTraceCollect()) {
+        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
+        if (StringUtils.isNotBlank(feignMark)) {
             collectTraceDataAndSave(request);
             RequestHolder.remove();
-        }else{
+        }else {
             RequestHolder.remove(requestContextLocalPostProcess);
         }
 
@@ -94,9 +95,8 @@ public class RequestContextInterceptor implements HandlerInterceptor {
     }
 
     private void collectTraceData(HttpServletRequest request, RequestContextLocal requestContextLocal) {
-        log.info(">>>>>>构建链路信息>>>>>>>>>>>>>>>>>>>>");
-        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
-        if (!StringUtils.isBlank(feignMark)) {
+        if (webconfigProperies.getOpenTraceCollect()) {
+            log.info(">>>>>>构建链路信息>>>>>>>>>>>>>>>>>>>>");
             String feignMethodName = request.getHeader(RequestHeaderConstant.FIEGN_METHOD_NAME);
             String consumerApplicationName = request.getHeader(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME);
             String applicationName = SpringContextHolder.getApplicationName();

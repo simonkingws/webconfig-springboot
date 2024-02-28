@@ -89,6 +89,10 @@ public class RequestContextLocal implements Serializable {
      */
     private Map<String, String> extendContext;
 
+    /** 是否采集链路数据 */
+    private Boolean openTraceCollect;
+
+
     /** 远程调用的方法名： 次参数传输不传递 */
     private String rpcMethodName;
 
@@ -114,7 +118,8 @@ public class RequestContextLocal implements Serializable {
                 .userId(request.getHeader(RequestHeaderConstant.USER_ID))
                 .userName(request.getHeader(RequestHeaderConstant.USER_NAME))
                 .userType(request.getHeader(RequestHeaderConstant.USER_TYPE))
-                .token(request.getHeader(RequestHeaderConstant.TOKEN));
+                .token(request.getHeader(RequestHeaderConstant.TOKEN))
+                .openTraceCollect(Boolean.parseBoolean(request.getHeader(RequestHeaderConstant.OPEN_TRACE_COLLECT)));
 
         Enumeration<String> headerNames = request.getHeaderNames();
         if (headerNames != null) {
@@ -161,6 +166,7 @@ public class RequestContextLocal implements Serializable {
         if (StringUtils.isNotBlank(this.token)) {
             headers.put(RequestHeaderConstant.TOKEN, Collections.singletonList(this.token));
         }
+        headers.put(RequestHeaderConstant.OPEN_TRACE_COLLECT, Collections.singletonList(this.openTraceCollect + ""));
         if (!CollectionUtils.isEmpty(this.extendContext)) {
             extendContext.forEach((k, v) -> headers.put(k, Collections.singletonList(v)));
         }

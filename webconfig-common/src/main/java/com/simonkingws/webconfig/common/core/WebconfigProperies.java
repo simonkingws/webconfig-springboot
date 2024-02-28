@@ -50,4 +50,9 @@ public class WebconfigProperies {
      */
     private Boolean feignInterceptor = true;
 
+    /**
+     * 是否开启链路信息采集
+     */
+    private Boolean openTraceCollect = false;
+
 }

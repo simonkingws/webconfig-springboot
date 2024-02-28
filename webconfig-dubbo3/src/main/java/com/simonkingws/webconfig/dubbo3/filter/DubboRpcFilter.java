@@ -8,6 +8,7 @@ import com.simonkingws.webconfig.common.util.RequestHolder;
 import com.simonkingws.webconfig.common.util.SpringContextHolder;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
@@ -64,11 +65,16 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
                 RequestHolder.add(local);
 
                 // 封装链路信息
-                TraceItem traceItem = TraceItem.copy2TraceItem(local);
-                traceItem.setMethodName(invokeMethodName);
-                traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
-                traceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
-                serverAttachment.setAttachment(RPC_CONTEXT_TRACE_ITEM, traceItem);
+                if (BooleanUtils.isTrue(local.getOpenTraceCollect())) {
+                    log.info(">>>>>链路信息采集启用中......");
+                    TraceItem traceItem = TraceItem.copy2TraceItem(local);
+                    traceItem.setMethodName(invokeMethodName);
+                    traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
+                    traceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
+                    serverAttachment.setAttachment(RPC_CONTEXT_TRACE_ITEM, traceItem);
+                }else{
+                    log.info(">>>>>>链路信息采集已被禁用中......");
+                }
             }
         }
 
@@ -80,36 +86,39 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
         // 获取本地信息
         RpcServiceContext rpcContext = RpcContext.getServiceContext();
         RpcContextAttachment serverAttachment = RpcContext.getServerAttachment();
-        TraceItem traceItem = (TraceItem)serverAttachment.getObjectAttachment(RPC_CONTEXT_TRACE_ITEM);
-        if (rpcContext.isProviderSide() && traceItem != null) {
-            // 保存链路信息到redis, 链路太长容易引起性能问题
-            traceItem.setSpanEndMs(Instant.now().toEpochMilli());
-            try {
-                if (appResponse.hasException()) {
-                    String traceId = traceItem.getTraceId();
-                    if (stringRedisTemplate != null) {
-                        stringRedisTemplate.opsForList().rightPush(traceId, JSON.toJSONString(traceItem));
+        Object objectAttachment = serverAttachment.getObjectAttachment(RPC_CONTEXT_TRACE_ITEM);
+        if (rpcContext.isProviderSide()) {
+            if (objectAttachment != null) {
+                TraceItem traceItem = (TraceItem) objectAttachment;
+                // 保存链路信息到redis, 链路太长容易引起性能问题
+                traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+                try {
+                    if (appResponse.hasException()) {
+                        String traceId = traceItem.getTraceId();
+                        if (stringRedisTemplate != null) {
+                            stringRedisTemplate.opsForList().rightPush(traceId, JSON.toJSONString(traceItem));
 
-                        List<String> range = stringRedisTemplate.opsForList().range(traceId, 0, -1);
-                        long count = 0;
-                        if (!CollectionUtils.isEmpty(range)) {
-                            count = range.stream().map(item -> com.alibaba.fastjson2.JSON.parseObject(item, TraceItem.class))
-                                    .filter(item -> item.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX))
-                                    .count();
-                        }
-                        if (appResponse.hasException() && count == 0) {
-                            traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
+                            List<String> range = stringRedisTemplate.opsForList().range(traceId, 0, -1);
+                            long count = 0;
+                            if (!CollectionUtils.isEmpty(range)) {
+                                count = range.stream().map(item -> com.alibaba.fastjson2.JSON.parseObject(item, TraceItem.class))
+                                        .filter(item -> item.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX))
+                                        .count();
+                            }
+                            if (appResponse.hasException() && count == 0) {
+                                traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
 
-                            String applicationName = SpringContextHolder.getApplicationName();
-                            traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
-                            traceItem.setProviderApplicatName(applicationName);
+                                String applicationName = SpringContextHolder.getApplicationName();
+                                traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
+                                traceItem.setProviderApplicatName(applicationName);
 
-                            stringRedisTemplate.opsForList().leftPush(traceId, JSON.toJSONString(traceItem));
+                                stringRedisTemplate.opsForList().leftPush(traceId, JSON.toJSONString(traceItem));
+                            }
                         }
                     }
+                }catch (Exception e){
+                    log.warn("redis未配置或reids服务没有启动：{}", e.getMessage());
                 }
-            }catch (Exception e){
-                log.warn("redis未配置或reids服务没有启动：{}", e.getMessage());
             }
 
             // 调用结束之后需要删除本地线程的数据，防止OOM

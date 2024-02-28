@@ -57,7 +57,12 @@ public interface RequestHeaderConstant {
      */
     String TOKEN = "token";
 
-    String[] HEADERS = {TRACE_ID, TRACE_SUM, START_POS, END_POS, USER_ID, USER_NAME, USER_TYPE, TOKEN};
+    /**
+     *  登录的令牌
+     */
+    String OPEN_TRACE_COLLECT = "open-trace-collect";
+
+    String[] HEADERS = {TRACE_ID, TRACE_SUM, START_POS, END_POS, USER_ID, USER_NAME, USER_TYPE, TOKEN, OPEN_TRACE_COLLECT};
 
     /** 以下参数不传递：Fiegn请求标识*/
     String FIEGN_MARK_KEY = "fiegn-request-mark";

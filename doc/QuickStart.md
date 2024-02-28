@@ -118,6 +118,8 @@ public interface GlobalExceptionResponseResolver {
 * 结束请求的路径或者方法：`endPos`
 * 请求的路登录信息：`userId`,`userName`,`userType`,`token`
 * 其他header信息：`extendContext`
+* 是否采集链路信息：`openTraceCollect`
+* 远程调用的方法名,次参数传输不传递：`rpcMethodName`
 
 ##### 1.6.2 日志的链路信息
 拦截器中设置了MDC信息：`MDC.put("traceId", requestContextLocal.getTraceId());`

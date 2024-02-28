@@ -9,6 +9,7 @@ import com.simonkingws.webconfig.common.context.RequestContextLocal;
 import com.simonkingws.webconfig.common.context.TraceItem;
 import com.simonkingws.webconfig.common.process.RequestContextLocalPostProcess;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -51,14 +52,15 @@ public class RequestHolder {
 
     public static void remove(RequestContextLocalPostProcess requestContextLocalPostProcess) {
         log.info("当前请求的本地副本被清除.");
-        final RequestContextLocal local = THREAD_LOCAL.get();
+        RequestContextLocal local = THREAD_LOCAL.get();
+        THREAD_LOCAL.remove();
+
         if (local != null) {
             local.setTraceEndMs(Instant.now().toEpochMilli());
+
+            // 异步处理链路数据
+            asyncHandleTrace(local, requestContextLocalPostProcess);
         }
-        THREAD_LOCAL.remove();
-        
-        // 异步处理链路数据
-        asyncHandleTrace(local, requestContextLocalPostProcess);
     }
 
     /**
@@ -69,8 +71,9 @@ public class RequestHolder {
      */
     private static void asyncHandleTrace(RequestContextLocal local, RequestContextLocalPostProcess requestContextLocalPostProcess) {
         CompletableFuture.runAsync(() -> {
-            if (local != null) {
-                String traceId = local.getTraceId();
+            String traceId = local.getTraceId();
+            Boolean openTraceCollect = local.getOpenTraceCollect();
+            if (BooleanUtils.isTrue(openTraceCollect)) {
                 try {
                     if (StringUtils.isNotBlank(traceId)) {
                         // 重置MDC
@@ -115,11 +118,6 @@ public class RequestHolder {
                         local.setTraceWalking(traceWalking);
                         local.setEndPos(traceItemList.get(traceItemList.size() - 1).getMethodName());
                     }
-
-                    // 调用销毁的方法
-                    if (requestContextLocalPostProcess != null) {
-                        requestContextLocalPostProcess.destroy(local);
-                    }
                 }catch (Exception e){
                     log.info("redis未配置或reids服务异常：", e);
                 }finally {
@@ -128,6 +126,11 @@ public class RequestHolder {
                         MDC.remove(traceId);
                     }
                 }
+            }
+
+            // 调用销毁的方法
+            if (requestContextLocalPostProcess != null) {
+                requestContextLocalPostProcess.destroy(local);
             }
         });
     }

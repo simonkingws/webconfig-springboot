@@ -47,10 +47,54 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         }
 
         RequestContextLocal requestContextLocal = RequestContextLocal.buildContext(request);
+        requestContextLocal.setOpenTraceCollect(webconfigProperies.getOpenTraceCollect());
         if (requestContextLocalPostProcess != null) {
             requestContextLocalPostProcess.afterRequestContextLocal(requestContextLocal);
         }
 
+        if (webconfigProperies.getOpenTraceCollect()) {
+            // 采集链路信息
+            collectTraceData(request, requestContextLocal);
+        }
+
+        RequestHolder.add(requestContextLocal);
+        MDC.put(MDCKey.TRACEID, requestContextLocal.getTraceId());
+
+        return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if (webconfigProperies.getOpenTraceCollect()) {
+            collectTraceDataAndSave(request);
+            RequestHolder.remove();
+        }else{
+            RequestHolder.remove(requestContextLocalPostProcess);
+        }
+
+        MDC.remove(MDCKey.TRACEID);
+    }
+
+    private void collectTraceDataAndSave(HttpServletRequest request) {
+        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
+        if (StringUtils.isNotBlank(feignMark)) {
+            // 保存链路信息到redis, 链路太长容易引起性能问题
+            try {
+                TraceItem traceItem = traceItemThreadLocal.get();
+                RequestContextLocal local = RequestHolder.get();
+                if (traceItem != null && local != null) {
+                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+
+                    stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
+                }
+            }catch (Exception e){
+                log.warn("redis未配置或reids服务没有启动：", e);
+            }
+        }
+    }
+
+    private void collectTraceData(HttpServletRequest request, RequestContextLocal requestContextLocal) {
+        log.info(">>>>>>构建链路信息>>>>>>>>>>>>>>>>>>>>");
         String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
         if (!StringUtils.isBlank(feignMark)) {
             String feignMethodName = request.getHeader(RequestHeaderConstant.FIEGN_METHOD_NAME);
@@ -66,34 +110,5 @@ public class RequestContextInterceptor implements HandlerInterceptor {
 
             requestContextLocal.setRpcMethodName(feignMethodName);
         }
-
-        RequestHolder.add(requestContextLocal);
-        MDC.put(MDCKey.TRACEID, requestContextLocal.getTraceId());
-
-        return true;
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        String feignMark = request.getHeader(RequestHeaderConstant.FIEGN_MARK_KEY);
-        if (StringUtils.isBlank(feignMark)) {
-            RequestHolder.remove(requestContextLocalPostProcess);
-        }else{
-            // 保存链路信息到redis, 链路太长容易引起性能问题
-            try {
-                TraceItem traceItem = traceItemThreadLocal.get();
-                RequestContextLocal local = RequestHolder.get();
-                if (traceItem != null && local != null) {
-                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
-
-                    stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
-                }
-            }catch (Exception e){
-                log.warn("redis未配置或reids服务没有启动：", e);
-            }
-
-            RequestHolder.remove();
-        }
-        MDC.remove(MDCKey.TRACEID);
     }
 }

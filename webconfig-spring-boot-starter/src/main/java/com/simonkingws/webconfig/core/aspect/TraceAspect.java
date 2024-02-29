@@ -1,12 +1,12 @@
 package com.simonkingws.webconfig.core.aspect;
 
-import com.alibaba.fastjson2.JSON;
 import com.simonkingws.webconfig.common.constant.SymbolConstant;
 import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.RequestContextLocal;
 import com.simonkingws.webconfig.common.context.TraceItem;
 import com.simonkingws.webconfig.common.util.RequestHolder;
 import com.simonkingws.webconfig.common.util.SpringContextHolder;
+import com.simonkingws.webconfig.common.util.TraceContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -16,6 +16,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * <code>@InnerTrace</code>的切面
@@ -37,6 +39,7 @@ public class TraceAspect {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
     @Pointcut("@annotation(com.simonkingws.webconfig.core.annotation.InnerTrace)")
     public void pointcut(){
 
@@ -45,7 +48,7 @@ public class TraceAspect {
     @Around("pointcut()")
     public Object Around(ProceedingJoinPoint joinPoint) throws Throwable {
         RequestContextLocal local = RequestHolder.get();
-        if (local == null || BooleanUtils.isNotTrue(local.getOpenTraceCollect())) {
+        if (local == null || BooleanUtils.isNotTrue(local.getOpenTraceCollect()) || TraceContextHolder.isEmpty()) {
             return joinPoint.proceed();
         }
 
@@ -79,6 +82,14 @@ public class TraceAspect {
         String applicationName = SpringContextHolder.getApplicationName();
         Integer traceSum = local.getTraceSum();
         traceSum++;
+        try {
+            Long size = stringRedisTemplate.opsForList().size(local.getTraceId());
+            if (size != null) {
+                traceSum += size.intValue();
+            }
+        }catch (Exception e) {
+            log.warn("方法[{}]中的redis 配置未配置或配置异常：{}", methodName, e.getMessage());
+        }
 
         local.setEndPos(methodName);
         local.setTraceSum(traceSum);
@@ -88,28 +99,25 @@ public class TraceAspect {
         traceItem.setProviderApplicatName(applicationName);
         traceItem.setMethodName(methodName);
 
+        List<TraceItem> traceItemList = TraceContextHolder.getTraceItems();
         Object proceed;
         try {
             // 执行方法
             proceed = joinPoint.proceed();
 
-            try {
-                traceItem.setSpanEndMs(Instant.now().toEpochMilli());
-                stringRedisTemplate.opsForList().leftPush(local.getTraceId(), JSON.toJSONString(traceItem));
-            }catch (Exception e){
-                log.warn("处理@InnerTrace注解异常：", e);
-            }
+            traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+            traceItemList.add(traceItem);
         }catch (Throwable th){
             // 有异常需要记录异常的链路信息，并将异常抛出
             try {
                 traceItem.setSpanEndMs(Instant.now().toEpochMilli());
-
-                String traceId = local.getTraceId();
-                stringRedisTemplate.opsForList().leftPush(traceId, JSON.toJSONString(traceItem));
+                traceItemList.add(traceItem);
 
                 // 增肌异常信息的处理
-                traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + th.getMessage());
-                stringRedisTemplate.opsForList().rightPush(traceId, JSON.toJSONString(traceItem));
+                TraceItem exceptionTraceItem = TraceItem.builder().build();
+                BeanUtils.copyProperties(traceItem, exceptionTraceItem);
+                exceptionTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + th.getMessage());
+                traceItemList.add(exceptionTraceItem);
             }catch (Exception e){
                 log.warn("处理@InnerTrace注解异常：", e);
             }

@@ -1,6 +1,5 @@
 package com.simonkingws.webconfig.core.Interceptor;
 
-import com.alibaba.fastjson2.JSON;
 import com.simonkingws.webconfig.common.constant.MDCKey;
 import com.simonkingws.webconfig.common.constant.RequestHeaderConstant;
 import com.simonkingws.webconfig.common.context.RequestContextLocal;
@@ -9,6 +8,7 @@ import com.simonkingws.webconfig.common.core.WebconfigProperies;
 import com.simonkingws.webconfig.common.process.RequestContextLocalPostProcess;
 import com.simonkingws.webconfig.common.util.RequestHolder;
 import com.simonkingws.webconfig.common.util.SpringContextHolder;
+import com.simonkingws.webconfig.common.util.TraceContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,8 +32,6 @@ import java.time.Instant;
 @Component
 public class RequestContextInterceptor implements HandlerInterceptor {
 
-    private final ThreadLocal<TraceItem> traceItemThreadLocal = new ThreadLocal<>();
-
     @Autowired(required = false)
     private RequestContextLocalPostProcess requestContextLocalPostProcess;
     @Autowired
@@ -48,14 +46,14 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         }
 
         RequestContextLocal requestContextLocal = RequestContextLocal.buildContext(request);
-        requestContextLocal.setOpenTraceCollect(webconfigProperies.getOpenTraceCollect());
-        if (requestContextLocalPostProcess != null) {
-            requestContextLocalPostProcess.afterRequestContextLocal(requestContextLocal);
-        }
-
-        if (BooleanUtils.isTrue(webconfigProperies.getOpenTraceCollect())) {
+        if (isRpcInvoke(request)) {
             // 采集链路信息
             collectTraceData(request, requestContextLocal);
+        }else{
+            requestContextLocal.setOpenTraceCollect(webconfigProperies.getOpenTraceCollect());
+            if (requestContextLocalPostProcess != null) {
+                requestContextLocalPostProcess.afterRequestContextLocal(requestContextLocal);
+            }
         }
 
         RequestHolder.add(requestContextLocal);
@@ -67,7 +65,7 @@ public class RequestContextInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         if (isRpcInvoke(request)) {
-            collectTraceDataSave();
+            traceDataSave();
         }else {
             RequestHolder.remove(requestContextLocalPostProcess);
         }
@@ -80,19 +78,20 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         return StringUtils.isNotBlank(feignMark);
     }
 
-    private void collectTraceDataSave() {
+    private void traceDataSave() {
         // 保存链路信息到redis, 链路太长容易引起性能问题
-        if (BooleanUtils.isTrue(webconfigProperies.getOpenTraceCollect())) {
+        RequestContextLocal local = RequestHolder.get();
+        if (local != null && BooleanUtils.isTrue(local.getOpenTraceCollect())) {
             try {
-                TraceItem traceItem = traceItemThreadLocal.get();
-                RequestContextLocal local = RequestHolder.get();
-                if (traceItem != null && local != null) {
-                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+                // 补充首次进入链路信息的结束时间
+                if (TraceContextHolder.isNotEmpty()) {
+                    TraceContextHolder.getTraceItems().get(0).setSpanEndMs(Instant.now().toEpochMilli());
+                    stringRedisTemplate.opsForList().rightPushAll(local.getTraceId(), TraceContextHolder.toStringList());
 
-                    stringRedisTemplate.opsForList().rightPush(local.getTraceId(), JSON.toJSONString(traceItem));
+                    TraceContextHolder.remove();
                 }
             }catch (Exception e){
-                log.warn("redis未配置或reids服务没有启动：", e);
+                log.warn("redis未配置或reids服务没有启动：{}", e.getMessage());
             }
         }
 
@@ -100,8 +99,8 @@ public class RequestContextInterceptor implements HandlerInterceptor {
     }
 
     private void collectTraceData(HttpServletRequest request, RequestContextLocal requestContextLocal) {
-        if (isRpcInvoke(request)) {
-            log.info(">>>>>>构建链路信息>>>>>>>>>>>>>>>>>>>>");
+        if (BooleanUtils.isTrue(requestContextLocal.getOpenTraceCollect())) {
+            log.info(">>>>>Feign调用-链路信息采集启用中......");
             String feignMethodName = request.getHeader(RequestHeaderConstant.FIEGN_METHOD_NAME);
             String consumerApplicationName = request.getHeader(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME);
             String applicationName = SpringContextHolder.getApplicationName();
@@ -111,9 +110,12 @@ public class RequestContextInterceptor implements HandlerInterceptor {
             traceItem.setProviderApplicatName(applicationName);
             traceItem.setMethodName(feignMethodName);
 
-            traceItemThreadLocal.set(traceItem);
-
+            // 链路信息保存在线程中
+            TraceContextHolder.addTraceItem(traceItem);
+            // 上下文设置远程调用的方法
             requestContextLocal.setRpcMethodName(feignMethodName);
+        }else{
+            log.info(">>>>>>Feign调用-链路信息采集已被禁用中......");
         }
     }
 }

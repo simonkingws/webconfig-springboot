@@ -307,6 +307,11 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 
 ### 4、更新日志
 
+### v1.0.1 @2024-02-29
+* [新增]新增链路信息的采集接口的配置
+* [优化]链路收集过程的方式
+* [优化]更新文档
+
 ### v1.0.1 @2024-02-28
 * [新增]`@InnerTrace`注解
 * [新增]全链路的信息采集的开关，默认false

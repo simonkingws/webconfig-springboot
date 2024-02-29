@@ -55,4 +55,14 @@ public class WebconfigProperies {
      */
     private Boolean openTraceCollect = false;
 
+    /**
+     * 链路信息采集的地址：IP/域名:PORT
+     */
+    private String traceCollectAddress;
+
+    /**
+     * 请求的协议，默认http
+     */
+    private String protocol = "http";
+
 }

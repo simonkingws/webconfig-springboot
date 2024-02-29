@@ -43,17 +43,19 @@ public class FeignRequestInterceptor implements RequestInterceptor {
                 String applicationName = SpringContextHolder.getApplicationName();
 
                 // 增加链路信息
-                Integer traceSum = Optional.ofNullable(requestContextLocal.getTraceSum()).orElse(0);
-                traceSum++;
-
-                requestContextLocal.setTraceSum(traceSum);
-                requestContextLocal.setEndPos(invokeMethodName);
-                requestContextLocal.setSpanId(Instant.now().toEpochMilli());
-
                 Map<String, Collection<String>> collectionMap = requestContextLocal.context2HeaderMap();
                 collectionMap.put(RequestHeaderConstant.FIEGN_MARK_KEY, RequestHeaderConstant.FIEGN_MARK_VAL);
                 collectionMap.put(RequestHeaderConstant.FIEGN_METHOD_NAME, Collections.singletonList(invokeMethodName));
                 collectionMap.put(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME, Collections.singletonList(applicationName));
+
+                Integer traceSum = Optional.ofNullable(requestContextLocal.getTraceSum()).orElse(0);
+                traceSum++;
+
+                // 更新动态Header信息
+                collectionMap.put(RequestHeaderConstant.TRACE_SUM, Collections.singletonList(String.valueOf(traceSum)));
+                collectionMap.put(RequestHeaderConstant.END_POS, Collections.singletonList(invokeMethodName));
+                collectionMap.put(RequestHeaderConstant.SPAN_ID, Collections.singletonList(String.valueOf(Instant.now().toEpochMilli())));
+
                 requestTemplate.headers(collectionMap);
             }
         }

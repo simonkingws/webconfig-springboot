@@ -2,6 +2,7 @@ package com.simonkingws.webconfig.common.context;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Tolerate;
 
 import java.io.Serializable;
 
@@ -52,6 +53,10 @@ public class TraceItem implements Serializable {
      */
     private Integer order;
 
+    @Tolerate
+    public TraceItem() {
+
+    }
 
     public static TraceItem copy2TraceItem(RequestContextLocal local){
         return TraceItem.builder()

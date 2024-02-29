@@ -14,4 +14,8 @@ public interface TraceConstant {
     String INVOKE_TRACE = "([%d][%s][%s][%s])";
 
     String EXCEPTION_TRACE_PREFIX = "java.lang.Throwable" + SymbolConstant.COLON + SymbolConstant.SPACE;
+
+    String COLLECT_PATH = "%s://%s/trace/collect";
+
+    String JSON_CONTENT_TYPE = "application/json;charset=utf-8";
 }

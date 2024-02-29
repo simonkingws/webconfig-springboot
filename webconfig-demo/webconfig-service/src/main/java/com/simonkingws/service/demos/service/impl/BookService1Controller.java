@@ -31,13 +31,12 @@ public class BookService1Controller implements BookService1FeignClient {
     @Override
     @InnerTrace
     public String bookName(Integer bookId) {
-        fooService.foo();
         BigDecimal book2Price = bookService2FeignClient.getBook2Price();
         log.info("bookService2FeignClient.getBook2Price()=====> book2Price={}", book2Price);
 //        BigDecimal book2Price = book2Service.getBook2Price();
 //        log.info("book2Service.getBook2Price()=====> book2Price={}", book2Price);
 //        int a = 1 / 0;
-
+        fooService.foo();
         return "<<侠客行2>> --> bookId=" + bookId;
     }
 

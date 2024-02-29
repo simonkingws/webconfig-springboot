@@ -1,19 +1,19 @@
 package com.simonkingws.webconfig.dubbo3.filter;
 
-import com.alibaba.fastjson.JSON;
 import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.RequestContextLocal;
 import com.simonkingws.webconfig.common.context.TraceItem;
 import com.simonkingws.webconfig.common.util.RequestHolder;
 import com.simonkingws.webconfig.common.util.SpringContextHolder;
+import com.simonkingws.webconfig.common.util.TraceContextHolder;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,7 +31,6 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
 
     // 共享的dubbo全局key
     public static final String RPC_CONTEXT_KEY = "dubbo3:rpc:request:context";
-    public static final String RPC_CONTEXT_TRACE_ITEM = "dubbo3:rpc:trace:item";
 
     @Setter
     private StringRedisTemplate stringRedisTemplate;
@@ -67,14 +66,15 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
 
                 // 封装链路信息
                 if (BooleanUtils.isTrue(local.getOpenTraceCollect())) {
-                    log.info(">>>>>链路信息采集启用中......");
+                    log.info(">>>>>Dubbo调用-链路信息采集启用中......");
                     TraceItem traceItem = TraceItem.copy2TraceItem(local);
                     traceItem.setMethodName(invokeMethodName);
                     traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
                     traceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
-                    serverAttachment.setAttachment(RPC_CONTEXT_TRACE_ITEM, traceItem);
+
+                    TraceContextHolder.addTraceItem(traceItem);
                 }else{
-                    log.info(">>>>>>链路信息采集已被禁用中......");
+                    log.info(">>>>>>Dubbo调用-链路信息采集已被禁用中......");
                 }
             }
         }
@@ -87,39 +87,35 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
         // 获取本地信息
         RpcServiceContext rpcContext = RpcContext.getServiceContext();
         RpcContextAttachment serverAttachment = RpcContext.getServerAttachment();
-        Object objectAttachment = serverAttachment.getObjectAttachment(RPC_CONTEXT_TRACE_ITEM);
         if (rpcContext.isProviderSide()) {
-            if (objectAttachment != null) {
-                TraceItem traceItem = (TraceItem) objectAttachment;
-                // 保存链路信息到redis, 链路太长容易引起性能问题
+            if (TraceContextHolder.isNotEmpty()) {
+                List<TraceItem> traceItems = TraceContextHolder.getTraceItems();
+                TraceItem traceItem = traceItems.get(0);
+                String traceId = traceItem.getTraceId();
                 traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+
+                // 如果链路中没有异常的链路，则将dubbo的链路异常加入
+                if (appResponse.hasException() && !TraceContextHolder.hasException()) {
+                    // 创建异常链路
+                    TraceItem exTraceItem = TraceItem.builder().build();
+                    BeanUtils.copyProperties(traceItem, exTraceItem);
+                    exTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
+                    exTraceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
+                    exTraceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
+
+                    traceItems.add(exTraceItem);
+                }
+
                 try {
-                    if (appResponse.hasException()) {
-                        String traceId = traceItem.getTraceId();
-                        if (stringRedisTemplate != null) {
-                            stringRedisTemplate.opsForList().rightPush(traceId, JSON.toJSONString(traceItem));
-
-                            List<String> range = stringRedisTemplate.opsForList().range(traceId, 0, -1);
-                            long count = 0;
-                            if (!CollectionUtils.isEmpty(range)) {
-                                count = range.stream().map(item -> com.alibaba.fastjson2.JSON.parseObject(item, TraceItem.class))
-                                        .filter(item -> item.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX))
-                                        .count();
-                            }
-                            if (appResponse.hasException() && count == 0) {
-                                traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
-
-                                String applicationName = SpringContextHolder.getApplicationName();
-                                traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
-                                traceItem.setProviderApplicatName(applicationName);
-
-                                stringRedisTemplate.opsForList().leftPush(traceId, JSON.toJSONString(traceItem));
-                            }
-                        }
+                    // 保存链路信息到redis, 链路太长容易引起性能问题
+                    if (stringRedisTemplate != null) {
+                        stringRedisTemplate.opsForList().rightPushAll(traceId, TraceContextHolder.toStringList());
                     }
                 }catch (Exception e){
                     log.warn("redis未配置或reids服务没有启动：{}", e.getMessage());
                 }
+                // 清除链路的线程容器
+                TraceContextHolder.remove();
             }
 
             // 调用结束之后需要删除本地线程的数据，防止OOM

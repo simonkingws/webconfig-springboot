@@ -55,13 +55,13 @@ public class RequestHolder {
 
     public static void remove() {
         THREAD_LOCAL.remove();
-        MDC.remove(MDCKey.TRACEID);
+        MDC.clear();
     }
 
     public static void remove(RequestContextLocalPostProcess requestContextLocalPostProcess) {
         log.info("当前请求的本地副本被清除.");
         RequestContextLocal local = THREAD_LOCAL.get();
-        THREAD_LOCAL.remove();
+        remove();
 
         if (local != null) {
             local.setTraceEndMs(Instant.now().toEpochMilli());
@@ -80,9 +80,9 @@ public class RequestHolder {
     private static void asyncHandleTrace(RequestContextLocal local, RequestContextLocalPostProcess requestContextLocalPostProcess) {
         CompletableFuture.runAsync(() -> {
             String traceId = local.getTraceId();
-            Boolean openTraceCollect = local.getOpenTraceCollect();
-            if (BooleanUtils.isTrue(openTraceCollect)) {
-                try {
+            try {
+                Boolean openTraceCollect = local.getOpenTraceCollect();
+                if (BooleanUtils.isTrue(openTraceCollect)) {
                     if (StringUtils.isNotBlank(traceId)) {
                         // 重置MDC
                         MDC.put(MDCKey.TRACEID, traceId);
@@ -104,14 +104,15 @@ public class RequestHolder {
                         // 推送数据
                         pushCollectData2Server(traceItemList);
                     }
-                }catch (Exception e){
-                    log.info("处理采集的链路数据异常：", e);
-                }finally {
-                    // 清除MDC的key
-                    if (StringUtils.isNotBlank(traceId)) {
-                        MDC.remove(traceId);
-                    }
+
                 }
+            }catch (Exception e){
+                log.info("处理采集的链路数据异常：", e);
+            }finally {
+                // 清除MDC
+                MDC.clear();
+                // 清除子线程链路线程中的数据
+                TraceContextHolder.remove();
             }
 
             // 调用销毁的方法
@@ -135,9 +136,6 @@ public class RequestHolder {
         traceItemList.add(traceBegin);
         if (TraceContextHolder.isNotEmpty()) {
             traceItemList.addAll(TraceContextHolder.getTraceItems());
-
-            // 清除链路线程中的数据
-            TraceContextHolder.remove();
         }
 
         // 处理缓存数据

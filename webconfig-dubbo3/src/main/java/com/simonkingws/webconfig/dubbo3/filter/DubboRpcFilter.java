@@ -120,6 +120,7 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
 
             // 调用结束之后需要删除本地线程的数据，防止OOM
             RequestHolder.remove();
+            serverAttachment.clearAttachments();
         }
     }
 

@@ -2,6 +2,7 @@ package com.simonkingws.webconfig.common.core;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Tolerate;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -38,6 +39,10 @@ public class JsonResult<T> implements Serializable {
      *  扩展信息
      */
     private Map<String, Object> extInfo;
+
+    @Tolerate
+    public JsonResult() {
+    }
 
     public static JsonResult<?> ofFail(String msg){
         return JsonResult.builder().success(false).msg(msg).build();

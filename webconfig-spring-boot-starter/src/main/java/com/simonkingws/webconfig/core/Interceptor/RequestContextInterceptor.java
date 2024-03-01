@@ -69,8 +69,6 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         }else {
             RequestHolder.remove(requestContextLocalPostProcess);
         }
-
-        MDC.remove(MDCKey.TRACEID);
     }
 
     private boolean isRpcInvoke(HttpServletRequest request) {

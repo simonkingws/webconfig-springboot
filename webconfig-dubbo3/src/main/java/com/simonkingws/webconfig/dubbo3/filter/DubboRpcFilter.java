@@ -88,39 +88,41 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
         RpcServiceContext rpcContext = RpcContext.getServiceContext();
         RpcContextAttachment serverAttachment = RpcContext.getServerAttachment();
         if (rpcContext.isProviderSide()) {
-            if (TraceContextHolder.isNotEmpty()) {
-                List<TraceItem> traceItems = TraceContextHolder.getTraceItems();
-                TraceItem traceItem = traceItems.get(0);
-                String traceId = traceItem.getTraceId();
-                traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+            try {
+                if (TraceContextHolder.isNotEmpty()) {
+                    List<TraceItem> traceItems = TraceContextHolder.getTraceItems();
+                    TraceItem traceItem = traceItems.get(0);
+                    String traceId = traceItem.getTraceId();
+                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
 
-                // 如果链路中没有异常的链路，则将dubbo的链路异常加入
-                if (appResponse.hasException() && !TraceContextHolder.hasException()) {
-                    // 创建异常链路
-                    TraceItem exTraceItem = TraceItem.builder().build();
-                    BeanUtils.copyProperties(traceItem, exTraceItem);
-                    exTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
-                    exTraceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
-                    exTraceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
+                    // 如果链路中没有异常的链路，则将dubbo的链路异常加入
+                    if (appResponse.hasException() && !TraceContextHolder.hasException()) {
+                        // 创建异常链路
+                        TraceItem exTraceItem = TraceItem.builder().build();
+                        BeanUtils.copyProperties(traceItem, exTraceItem);
+                        exTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
+                        exTraceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
+                        exTraceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
 
-                    traceItems.add(exTraceItem);
-                }
-
-                try {
-                    // 保存链路信息到redis, 链路太长容易引起性能问题
-                    if (stringRedisTemplate != null) {
-                        stringRedisTemplate.opsForList().rightPushAll(traceId, TraceContextHolder.toStringList());
+                        traceItems.add(exTraceItem);
                     }
-                }catch (Exception e){
-                    log.warn("redis未配置或reids服务没有启动：{}", e.getMessage());
+
+                    try {
+                        // 保存链路信息到redis, 链路太长容易引起性能问题
+                        if (stringRedisTemplate != null) {
+                            stringRedisTemplate.opsForList().rightPushAll(traceId, TraceContextHolder.toStringList());
+                        }
+                    }catch (Exception e){
+                        log.warn("redis未配置或reids服务没有启动：{}", e.getMessage());
+                    }
                 }
+            }finally {
+                serverAttachment.clearAttachments();
+                // 调用结束之后需要删除本地线程的数据，防止OOM
+                RequestHolder.remove();
                 // 清除链路的线程容器
                 TraceContextHolder.remove();
             }
-
-            // 调用结束之后需要删除本地线程的数据，防止OOM
-            RequestHolder.remove();
-            serverAttachment.clearAttachments();
         }
     }
 

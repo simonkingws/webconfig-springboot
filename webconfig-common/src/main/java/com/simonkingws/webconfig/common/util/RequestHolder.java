@@ -61,13 +61,15 @@ public class RequestHolder {
     public static void remove(RequestContextLocalPostProcess requestContextLocalPostProcess) {
         log.info("当前请求的本地副本被清除.");
         RequestContextLocal local = THREAD_LOCAL.get();
-        remove();
+        try {
+            if (local != null) {
+                local.setTraceEndMs(Instant.now().toEpochMilli());
 
-        if (local != null) {
-            local.setTraceEndMs(Instant.now().toEpochMilli());
-
-            // 异步处理链路数据
-            asyncHandleTrace(local, requestContextLocalPostProcess);
+                // 异步处理链路数据
+                asyncHandleTrace(local, requestContextLocalPostProcess);
+            }
+        }finally {
+            remove();
         }
     }
 

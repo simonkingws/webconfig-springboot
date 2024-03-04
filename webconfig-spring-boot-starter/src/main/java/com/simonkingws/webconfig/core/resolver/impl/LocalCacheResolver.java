@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class LocalCacheResolver implements CacheResolver {
 
     @Override
-    public Boolean setIfAbsent(String key, String value, long timeout, TimeUnit unit) {
+    public synchronized Boolean setIfAbsent(String key, String value, long timeout, TimeUnit unit) {
         Cache<String, String> stringInstance = LocalCacheUtil.getStringInstance();
         String ifPresent = stringInstance.getIfPresent(key);
         if (StringUtils.isNotBlank(ifPresent)) {

@@ -4,7 +4,9 @@ import com.simonkingws.api.service.BookService;
 import com.simonkingws.api.service2.Book2Service;
 import com.simonkingws.webconfig.common.constant.DateFormatConstant;
 import com.simonkingws.webconfig.core.annotation.RequestLimiting;
+import com.simonkingws.webconfig.core.annotation.SubmitLimiting;
 import com.simonkingws.webconfig.core.contant.Policy;
+import com.simonkingws.webconfig.core.contant.RunMode;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,5 +76,17 @@ public class BasicController {
     @RequestMapping("/testDubbo4")
     public String testDubbo4()  {
         return book2Service.getBook2Price().toString();
+    }
+
+    @RequestMapping("/testSubmitInit")
+    @SubmitLimiting(mode = RunMode.INIT)
+    public String testSubmitInit()  {
+        return "init success";
+    }
+
+    @RequestMapping("/testSubmitValid")
+    @SubmitLimiting
+    public String testSubmitValid()  {
+        return "submitValid success";
     }
 }

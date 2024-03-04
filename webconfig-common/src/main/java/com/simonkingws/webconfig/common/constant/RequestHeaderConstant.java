@@ -64,7 +64,7 @@ public interface RequestHeaderConstant {
 
     String[] HEADERS = {TRACE_ID, TRACE_SUM, START_POS, END_POS, USER_ID, USER_NAME, USER_TYPE, TOKEN, OPEN_TRACE_COLLECT};
 
-    /** 以下参数不再ThreaLocal中传递*/
+    /** 以下参数不再ThreaLocal中传递 */
     /** Fiegn请求标识 */
     String FIEGN_MARK_KEY = "fiegn-request-mark";
     Collection<String> FIEGN_MARK_VAL = Collections.singletonList("fiegn-request");
@@ -75,4 +75,7 @@ public interface RequestHeaderConstant {
      * 子链路的唯一标识
      */
     String SPAN_ID = "span-id";
+
+    /** 请求中唯一标识 */
+    String ONCE_ACCESS_TOKEN = "once-access-token";
 }

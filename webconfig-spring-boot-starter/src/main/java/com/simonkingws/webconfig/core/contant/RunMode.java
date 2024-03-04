@@ -3,18 +3,18 @@ package com.simonkingws.webconfig.core.contant;
 /**
  * 运行模式
  *
- * @author: ws
- * @date: 2024/1/30 17:22
+ * @author ws
+ * @date 2024/3/4 14:30
  */
 public enum RunMode {
 
     /**
-     * 单机运行
+     * 初始化
      */
-    LOCAL,
+    INIT,
 
     /**
-     * redis运行
+     * 校验
      */
-    REDIS
+    VALID
 }

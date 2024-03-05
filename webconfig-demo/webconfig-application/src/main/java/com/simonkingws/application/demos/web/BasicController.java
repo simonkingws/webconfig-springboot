@@ -87,6 +87,7 @@ public class BasicController {
     @RequestMapping("/testSubmitValid")
     @SubmitLimiting
     public String testSubmitValid()  {
+        int i = 1 / 0;
         return "submitValid success";
     }
 }

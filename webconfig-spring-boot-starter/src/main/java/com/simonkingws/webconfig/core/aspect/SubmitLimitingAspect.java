@@ -10,6 +10,7 @@ import com.simonkingws.webconfig.core.resolver.CacheResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -56,7 +57,6 @@ public class SubmitLimitingAspect {
 
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         log.info("@SubmitLimiting注解拦截方法[{}()]>>>>>>开始处理>>>>>>>>>>", method.getName());
-        String cacheKey = String.format(RedisConstant.CACHE_KEY, method.getName());
         SubmitLimiting[] annotations = method.getAnnotationsByType(SubmitLimiting.class);
         // 多个@RequestLimiting， 取其中一个
         SubmitLimiting submitLimiting = annotations[0];
@@ -71,12 +71,26 @@ public class SubmitLimitingAspect {
             if (StringUtils.isBlank(header)) {
                 throw new WebConfigException("请求头中没有包含校验重复提交的参数！");
             }
-            Boolean ifAbsent = cacheResolver.setIfAbsent(cacheKey, header, 30, TimeUnit.MINUTES);
+            String cacheKey = String.format(RedisConstant.CACHE_KEY, header);
+            Boolean ifAbsent = cacheResolver.setIfAbsent(cacheKey, method.getName(), 30, TimeUnit.MINUTES);
             if (!ifAbsent) {
                 throw new WebConfigException("该请求已提交，请勿重复操作！");
             }
         }
 
         return joinPoint.proceed();
+    }
+
+    @AfterThrowing(value = "pointcut()")
+    public void afterThrowing()  {
+        // 方法内部出现异常，需要清除缓存
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        assert requestAttributes != null;
+        HttpServletRequest request = requestAttributes.getRequest();
+
+        // 清除缓存，允许重复执行
+        String cacheKey = String.format(RedisConstant.CACHE_KEY, request.getHeader(RequestHeaderConstant.ONCE_ACCESS_TOKEN));
+        CacheResolver cacheResolver = cacheResolverMap.get(webconfigProperies.getRequestLimitCacheMode());
+        cacheResolver.remove(cacheKey);
     }
 }

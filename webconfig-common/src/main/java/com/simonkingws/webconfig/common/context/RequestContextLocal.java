@@ -25,6 +25,27 @@ public class RequestContextLocal implements Serializable {
     private static final long serialVersionUID = 4038049315156683942L;
 
     /**
+     *  用户ID
+     */
+    private String userId;
+
+    /**
+     *  用户名称
+     */
+    private String userName;
+
+    /**
+     *  用户类型
+     */
+    private String userType;
+
+    /**
+     *  登录的令牌
+     */
+    private String token;
+
+
+    /**
      *  每次请求链路的唯一标识
      */
     private String traceId;
@@ -64,25 +85,6 @@ public class RequestContextLocal implements Serializable {
      */
     private Long traceEndMs;
 
-    /**
-     *  用户ID
-     */
-    private String userId;
-
-    /**
-     *  用户名称
-     */
-    private String userName;
-
-    /**
-     *  用户类型
-     */
-    private String userType;
-
-    /**
-     *  登录的令牌
-     */
-    private String token;
 
     /**
      *  扩展信息

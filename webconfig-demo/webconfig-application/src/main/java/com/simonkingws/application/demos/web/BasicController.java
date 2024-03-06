@@ -8,6 +8,9 @@ import com.simonkingws.webconfig.core.annotation.SubmitLimiting;
 import com.simonkingws.webconfig.core.contant.Policy;
 import com.simonkingws.webconfig.core.contant.RunMode;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
 /**
  * 测试控制类
@@ -30,6 +34,8 @@ public class BasicController {
     private BookService bookService;
     @DubboReference
     private Book2Service book2Service;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 测试Form表单提交
@@ -89,5 +95,14 @@ public class BasicController {
     public String testSubmitValid()  {
         int i = 1 / 0;
         return "submitValid success";
+    }
+
+    @RequestMapping("/testLua")
+    public String testLua()  {
+        stringRedisTemplate.opsForValue().set("aaa", "xxxxx");
+        String luascript = "local aaa = redis.call('get',KEYS[1]); redis.call('del',KEYS[1]); return aaa;";
+        System.out.println("qq:" + stringRedisTemplate.execute(RedisScript.of(luascript, String.class), Collections.singletonList("aaa")));
+        System.out.println("qqaa:" + stringRedisTemplate.opsForValue().get("aaa"));
+        return "testLua success";
     }
 }

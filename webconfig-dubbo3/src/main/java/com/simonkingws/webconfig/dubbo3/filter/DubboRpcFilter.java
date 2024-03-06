@@ -60,6 +60,7 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
                 local.setTraceSum(traceSum);
                 local.setEndPos(invokeMethodName);
                 local.setRpcMethodName(invokeMethodName);
+                local.setSpanId(Instant.now().toEpochMilli());
 
                 // 将处理好的数据放进本地上下文
                 RequestHolder.add(local);

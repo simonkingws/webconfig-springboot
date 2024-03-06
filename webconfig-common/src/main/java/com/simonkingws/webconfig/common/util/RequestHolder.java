@@ -108,6 +108,11 @@ public class RequestHolder {
                     }
 
                 }
+
+                // 调用销毁的方法
+                if (requestContextLocalPostProcess != null) {
+                    requestContextLocalPostProcess.destroy(local);
+                }
             }catch (Exception e){
                 log.info("处理采集的链路数据异常：", e);
             }finally {
@@ -115,11 +120,6 @@ public class RequestHolder {
                 MDC.clear();
                 // 清除子线程链路线程中的数据
                 TraceContextHolder.remove();
-            }
-
-            // 调用销毁的方法
-            if (requestContextLocalPostProcess != null) {
-                requestContextLocalPostProcess.destroy(local);
             }
         });
     }
@@ -156,6 +156,7 @@ public class RequestHolder {
             }
             TraceItem traceItem = exceptionList.get(0);
             traceItem.setOrder(nomalList.size());
+            traceItem.setSpanEndMs(local.getTraceEndMs());
 
             nomalList.add(traceItem);
         }

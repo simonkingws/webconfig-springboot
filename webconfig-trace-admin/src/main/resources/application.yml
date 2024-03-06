@@ -1,0 +1,28 @@
+# 服务端口
+server:
+  port: 8088
+
+# 模板引擎的设置
+# 模板编码
+spring:
+  thymeleaf:
+    cache: false
+    check-template: false
+
+  # 数据源
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/webconfig_trace?characterEncoding=utf-8
+    username: root
+    password: root
+
+  #脚本初始化
+  sql:
+    init:
+      schema-locations: classpath:db/db_schmal.sql
+      data-locations: classpath:db/db_data.sql
+      encoding: utf-8
+      username: ${spring.datasource.username}
+      password: ${spring.datasource.password}
+      mode: always
+

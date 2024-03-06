@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!--======================================= 本地变量 ========================================-->
+	<!--在没有定义${LOG_HOME}系统变量的时候，可以设置此本地变量。-->
+	<property name="LOG_HOME" value="/app/log" />
+	
+	<!-- 应用名称：和统一配置中的项目代码保持一致（小写） -->
+	<property name="APP_NAME" value="webconfig-trace_admin" />
+	<!--日志文件保留天数-->
+	<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+	<property name="LOG_MAX_HISTORY" value="30" />
+	<!--应用日志文件保存路径-->
+	<property name="LOG_APP_HOME" value="${LOG_HOME}/app" />
+	<!--系统日志文件保存路径-->
+	<property name="LOG_SYS_HOME" value="${LOG_HOME}/sys" />
+
+	<!--=========================== 按照每天生成日志文件：默认配置===================================-->
+	<!-- 控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出：%d表示日期，%thread表示线程名，traceId标识链路标识，%-5level：级别从左显示5个字符宽度，%logger：日志名，%line：日志打印行号，%msg：日志消息，%n：是换行符-->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId:%X{traceId}] %-5level %logger{100}[%line] - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!-- 按照每天生成日志文件：应用日志 -->
+	<appender name="APP"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!--日志文件输出的文件名-->
+			<FileNamePattern>${LOG_APP_HOME}/${APP_NAME}.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<!--日志文件保留天数-->
+			<MaxHistory>${LOG_MAX_HISTORY}</MaxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%logger：日志名，%line：日志打印行号，%msg：日志消息，%n：是换行符-->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId:%X{traceId}] %-5level %logger{100}[%line] - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!-- 按照每天生成日志文件：DUBBO日志-->
+	<appender name="DUBBO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!--日志文件输出的文件名-->
+			<FileNamePattern>${LOG_SYS_HOME}/${APP_NAME}-dubbo.log.%d{yyyy-MM-dd}</FileNamePattern>
+			<!--日志文件保留天数-->
+			<MaxHistory>${LOG_MAX_HISTORY}</MaxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%logger：日志名，%line：日志打印行号，%msg：日志消息，%n：是换行符-->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId:%X{traceId}] %-5level %logger{100}[%line] - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!-- 按照每天生成日志文件：SYS日志-->
+	<appender name="SYS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!--日志文件输出的文件名-->
+			<FileNamePattern>${LOG_SYS_HOME}/${APP_NAME}-sys.log.%d{yyyy-MM-dd}</FileNamePattern>
+			<!--日志文件保留天数-->
+			<MaxHistory>${LOG_MAX_HISTORY}</MaxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度，%logger：日志名，%line：日志打印行号，%msg：日志消息，%n：是换行符-->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId:%X{traceId}] %-5level %logger{100}[%line] - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!--============================ 按照每天生成日志文件：APP日志：默认配置 ==========================-->
+	<logger name="com.simonkingws" additivity="false">
+		<level value="info"/>
+		<!--本地调试时去掉注释 -->
+		<appender-ref ref="STDOUT" />
+		<!--<appender-ref ref="APP"/>-->
+	</logger>
+	<!--===============================  日志输出: 默认系统日志 ======================================-->
+	<root level="info">
+		<!--本地调试时去掉注释 -->
+		<appender-ref ref="STDOUT" />
+		<!--<appender-ref ref="SYS" />-->
+	</root>
+</configuration>

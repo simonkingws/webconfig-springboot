@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: url('../static/image/backgroud.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .login-container {
+      width: 300px;
+      margin: 100px auto;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+
+    input[type="button"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .register{
+      color: blue;
+      cursor: pointer;
+    }
+
+    .warning{
+      display: inline-block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: grey;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>登录</h2>
+    <span class="warning">没有账户，去<span class="register">[注册]</span></span>
+    <form action="/login/doLogin" method="post">
+      <label><input type="text" name="username" placeholder="用户名" required></label>
+      <label><input type="password" name="password" placeholder="密码" required> </label>
+      <input type="button" value="登录">
+    </form>
+  </div>
+</body>
+<script type="text/javascript" src="../static/js/jqery-3.7.1.js"></script>
+<script type="text/javascript">
+  $(function(){
+      // 注册
+      $(".register").click(function(){
+          let $submit = $("input[type='button']");
+          $submit.val("注册");
+          $submit.before('<label><input type="password" name="confirmPwd" placeholder="确认密码" required> </label>');
+          $("form").attr("action","/login/doRegister");
+          $("h2").text("注册");
+          $(".warning").hide();
+      });
+
+      // 登录/注册
+      $("input[type='button']").click(function () {
+          let url = $("form").attr("action");
+          $.post(url, $("form").serialize(), function (resp) {
+              if (resp.success) {
+                  if (url.indexOf("doRegister") > 0) {
+                      window.location.href = "/login/login";
+                  }else{
+                      window.location.href = "/login/index";
+                  }
+              }else{
+                  alert(resp.msg);
+              }
+          });
+      });
+  });
+</script>
+</html>

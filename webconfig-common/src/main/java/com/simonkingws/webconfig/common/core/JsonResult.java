@@ -52,9 +52,14 @@ public class JsonResult<T> implements Serializable {
         return JsonResult.builder().success(false).msg(msg).code(code).build();
     }
 
+    public static <T> JsonResult<T> ofSuccess(){
+        return JsonResult.<T>builder().success(true).build();
+    }
+
     public static <T> JsonResult<T> ofSuccess(T data){
         return JsonResult.<T>builder().success(true).data(data).build();
     }
+
     public static <T> JsonResult<T> ofSuccess(T data, String code){
         return JsonResult.<T>builder().success(true).data(data).code(code).build();
     }

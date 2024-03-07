@@ -1,6 +1,7 @@
 package com.simonkingws.webconfig.trace.admin.service;
 
 import com.simonkingws.webconfig.common.context.TraceItem;
+import com.simonkingws.webconfig.trace.admin.model.TraceWalkingServer;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ import java.util.List;
 public interface TraceWalkingServerService {
 
     void processTraceWalkingServer(List<TraceItem> traceItems);
+
+    List<TraceWalkingServer> getAllServerList();
 }

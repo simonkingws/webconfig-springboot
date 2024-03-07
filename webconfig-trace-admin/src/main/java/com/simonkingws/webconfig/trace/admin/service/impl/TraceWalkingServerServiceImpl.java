@@ -62,4 +62,9 @@ public class TraceWalkingServerServiceImpl implements TraceWalkingServerService 
         }
         log.info("......[TraceWalkingServer]数据采集成功......");
     }
+
+    @Override
+    public List<TraceWalkingServer> getAllServerList() {
+        return traceWalkingServerMapper.selectList(Wrappers.lambdaQuery(TraceWalkingServer.class));
+    }
 }

@@ -2,6 +2,9 @@ package com.simonkingws.webconfig.trace.admin.mapper;
 
 import com.simonkingws.webconfig.trace.admin.mapper.generate.GenerateMapper;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
+import com.simonkingws.webconfig.trace.admin.vo.ServerInvokeVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
  */
 public interface TraceWalkingMethodMapper extends GenerateMapper<TraceWalkingMethod> {
 
+    List<ServerInvokeVO> statServerInvokeCount();
 }

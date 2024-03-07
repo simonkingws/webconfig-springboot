@@ -1,16 +1,21 @@
 package com.simonkingws.webconfig.trace.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.TraceItem;
+import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
 import com.simonkingws.webconfig.trace.admin.mapper.TraceWalkingCompeteMapper;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingCompeteService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -54,5 +59,17 @@ public class TraceWalkingCompeteServiceImpl implements TraceWalkingCompeteServic
         traceWalkingCompeteMapper.insert(compete);
         log.info("......[TraceWalkingCompete]数据采集成功......");
 
+    }
+
+    @Override
+    public List<TraceWalkingCompete> getCompeteByCondition(TraceWalkingDTO traceWalkingDto) {
+        LambdaQueryWrapper<TraceWalkingCompete> queryWrapper = Wrappers.lambdaQuery(TraceWalkingCompete.class)
+                .eq(StringUtils.isNoneBlank(traceWalkingDto.getTraceId()), TraceWalkingCompete::getTraceId, traceWalkingDto.getTraceId())
+                .eq(traceWalkingDto.getExceptionFlag() != null, TraceWalkingCompete::getExceptionFlag, traceWalkingDto.getExceptionFlag())
+                .ge(traceWalkingDto.getInvokeTimeStart() != null, TraceWalkingCompete::getTraceStartTime, traceWalkingDto.getInvokeTimeStart())
+                .le(traceWalkingDto.getInvokeTimeEnd() != null, TraceWalkingCompete::getTraceEndTime, traceWalkingDto.getInvokeTimeEnd())
+                .orderByDesc(TraceWalkingCompete::getTraceStartTime)
+                .last("LIMIT" + Optional.ofNullable(traceWalkingDto.getTopSum()).orElse(10));
+        return traceWalkingCompeteMapper.selectList(queryWrapper);
     }
 }

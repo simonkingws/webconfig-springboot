@@ -4,6 +4,7 @@ import com.simonkingws.webconfig.common.context.TraceItem;
 import com.simonkingws.webconfig.trace.admin.mapper.TraceWalkingMethodMapper;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingMethodService;
+import com.simonkingws.webconfig.trace.admin.vo.ServerInvokeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,5 +50,10 @@ public class TraceWalkingMethodServiceImpl implements TraceWalkingMethodService 
         // 数据入库
         traceWalkingMethodMapper.insertBatch(methodList);
         log.info("......[TraceWalkingMethod]数据采集成功......");
+    }
+
+    @Override
+    public List<ServerInvokeVO> statServerInvokeCount() {
+        return traceWalkingMethodMapper.statServerInvokeCount();
     }
 }

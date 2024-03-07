@@ -1,5 +1,7 @@
 package com.simonkingws.webconfig.trace.admin.service;
 
+import com.simonkingws.webconfig.trace.admin.model.TraceWalkingUser;
+
 /**
  * <p>
  * 链路登录用户信息 服务类
@@ -10,4 +12,9 @@ package com.simonkingws.webconfig.trace.admin.service;
  */
 public interface TraceWalkingUserService {
 
+    TraceWalkingUser getUserByUsername(String username);
+
+    void insert(TraceWalkingUser user);
+
+    void disabledUser(TraceWalkingUser user);
 }

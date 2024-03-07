@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 全局异常处理器
@@ -69,6 +70,18 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 参数校验配合@Requestparam的异常
+     *
+     * @author ws
+     * @date 2024/3/7 16:29
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Object constraintViolationExceptionExceptionHandler(HttpServletRequest request, ConstraintViolationException e) {
+        log.error(String.format(LOG_TEMPLATE, "constraintViolationExceptionExceptionHandler"), request.getRequestURL(), e);
+        return doGenerateResult(e, getConstraintViolationExceptionMsg(e));
+    }
+
+    /**
      * 请求参数缺失异常
      *
      * @author ws
@@ -109,6 +122,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理ConstraintViolationException的参数
+     *
+     * @author ws
+     * @date 2024/3/7 16:34
+     */
+    private String getConstraintViolationExceptionMsg(ConstraintViolationException e) {
+        Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+        if (CollectionUtils.isEmpty(violations)) {
+            return e.getMessage();
+        }
+
+        return violations.stream().filter(Objects::nonNull)
+                .map(cv -> String.format(REQUEST_PARAMS_EX_TEMPLATE, cv.getPropertyPath(), cv.getMessage()))
+                .collect(Collectors.joining("\n"));
+    }
+
+    /**
      * 处理公用的参数校验异常的信息
      *
      * @author ws
@@ -119,7 +149,7 @@ public class GlobalExceptionHandler {
         if (!CollectionUtils.isEmpty(fieldErrors)) {
             List<String> msgs = new ArrayList<>(fieldErrors.size());
             fieldErrors.forEach(error -> msgs.add(showErrorMsg(error)));
-            errorMsg = String.join(";", msgs);
+            errorMsg = String.join("\n", msgs);
         }
         return Optional.ofNullable(errorMsg).orElse(detaultMsg);
     }

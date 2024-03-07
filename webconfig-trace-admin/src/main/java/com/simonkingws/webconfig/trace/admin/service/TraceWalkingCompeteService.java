@@ -1,6 +1,8 @@
 package com.simonkingws.webconfig.trace.admin.service;
 
 import com.simonkingws.webconfig.common.context.TraceItem;
+import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
+import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
 
 import java.util.List;
 
@@ -15,4 +17,6 @@ import java.util.List;
 public interface TraceWalkingCompeteService {
 
     void processTraceWalkingCompelete(List<TraceItem> traceItems);
+
+    List<TraceWalkingCompete> getCompeteByCondition(TraceWalkingDTO traceWalkingDto);
 }

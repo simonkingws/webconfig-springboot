@@ -1,5 +1,7 @@
 package com.simonkingws.webconfig.trace.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.simonkingws.webconfig.common.context.TraceItem;
 import com.simonkingws.webconfig.trace.admin.mapper.TraceWalkingMethodMapper;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
@@ -55,5 +57,13 @@ public class TraceWalkingMethodServiceImpl implements TraceWalkingMethodService 
     @Override
     public List<ServerInvokeVO> statServerInvokeCount() {
         return traceWalkingMethodMapper.statServerInvokeCount();
+    }
+
+    @Override
+    public List<TraceWalkingMethod> getMethodTraceList(String traceId) {
+        LambdaQueryWrapper<TraceWalkingMethod> queryWrapper = Wrappers.lambdaQuery(TraceWalkingMethod.class)
+                .eq(TraceWalkingMethod::getTraceId, traceId)
+                .orderByDesc(TraceWalkingMethod::getInvokeOrder);
+        return traceWalkingMethodMapper.selectList(queryWrapper);
     }
 }

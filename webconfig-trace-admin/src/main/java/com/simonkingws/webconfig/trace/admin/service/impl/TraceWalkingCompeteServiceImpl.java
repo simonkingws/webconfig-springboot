@@ -69,7 +69,7 @@ public class TraceWalkingCompeteServiceImpl implements TraceWalkingCompeteServic
                 .ge(traceWalkingDto.getInvokeTimeStart() != null, TraceWalkingCompete::getTraceStartTime, traceWalkingDto.getInvokeTimeStart())
                 .le(traceWalkingDto.getInvokeTimeEnd() != null, TraceWalkingCompete::getTraceEndTime, traceWalkingDto.getInvokeTimeEnd())
                 .orderByDesc(TraceWalkingCompete::getTraceStartTime)
-                .last("LIMIT" + Optional.ofNullable(traceWalkingDto.getTopSum()).orElse(10));
+                .last("LIMIT " + Optional.ofNullable(traceWalkingDto.getTopSum()).orElse(10));
         return traceWalkingCompeteMapper.selectList(queryWrapper);
     }
 }

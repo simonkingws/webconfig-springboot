@@ -1,6 +1,252 @@
-<html>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>链路统计</title>
+    <link rel="stylesheet" th:href="@{/css/layui.css}" th:inline="css">
+    <style>
+        body {
+            margin: 10px 30px;
+            padding: 0;
+        }
+        p{
+            margin: 15px 0;
+            font-size: 16px;
+            border-bottom: 1px solid #d2d2d2;
+        }
+        .little-table{
+            width: 25%;
+        }
+        #chart-container {
+            position: relative;
+            height: 100vh;
+            max-height: 400px;
+            overflow: hidden;
+            display: none;
+        }
+        .li-default{
+            color: #16baaa;
+            border-bottom: 2px solid #16baaa;
+        }
+        .title-ul{
+            display: inline-block;
+        }
+        .title-ul li{
+            float: left;
+            text-align: center;
+            cursor: pointer;
+            width: 100px;
+            border-bottom: 1px solid #d2d2d2;
+        }
+        td ul {
+            border: 1px solid #16baaa;
+            padding: 5px 15px;
+            margin-left: 25px;
+            max-width: 600px;
+        }
+        td ul li {
+            margin-top: 5px;
+            list-style-type: none;
+        }
+        .a-btn{
+            cursor: pointer;
+            color: blue;
+            display: table-cell;
+        }
+    </style>
+</head>
 <body>
-<h1>hello word!!!</h1>
-<p>this is a html page</p>
+    <div>
+        <p>服务调用的统计</p>
+        <ul class="title-ul">
+            <li class="li-default" data-type="list">列表</li>
+            <li data-type="histogram">柱状图</li>
+        </ul>
+        <div class="data-list">
+            <table class="layui-table little-table">
+                <colgroup>
+                    <col>
+                    <col>
+                    <col>
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>服务名称</th>
+                    <th>调用的次数</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="serviceStat: ${serverHistogram}">
+                        <td th:text="${serviceStat.serverName}" ></td>
+                        <td th:text="${serviceStat.invokeCount}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="chart-container"></div>
+    </div>
+    <div>
+        <p>服务调用的拓扑图</p>
+        <div></div>
+    </div>
+    <div>
+        <p>服务调用的链路</p>
+        <table class="layui-table">
+            <colgroup>
+                <col style="width: 80px;">
+                <col style="width: 285px;">
+                <col style="width: 120px;">
+                <col style="width: 120px;">
+                <col style="width: 160px;">
+                <col style="width: 160px;">
+                <col style="width: 120px;">
+                <col style="width: 150px;">
+                <col style="width: 120px;">
+                <col style="width: 100px;">
+                <col style="width: 100px;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>traceId</th>
+                    <th>链路的起点</th>
+                    <th>链路的终点</th>
+                    <th>起点所在的服务名称</th>
+                    <th>开始调用的时间</th>
+                    <th>耗时(ms)</th>
+                    <th>总链路数</th>
+                    <th>调用的方法数</th>
+                    <th>是否有异常</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="walkingCompete,status: ${walkingCompeteList}">
+                    <td th:text="${status.index+1}"></td>
+                    <td th:inline="text">[[${walkingCompete.traceId}]]<a href="javascript:void(0);" class="a-btn" th:data="${walkingCompete.traceId}">[详细信息]</a></td>
+                    <td th:text="${walkingCompete.traceStartPos}"></td>
+                    <td th:text="${walkingCompete.traceEndPos}"></td>
+                    <td th:text="${walkingCompete.applicationName}"></td>
+                    <td th:text="${#dates.format(walkingCompete.traceStartTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${walkingCompete.traceTimeConsume}"></td>
+                    <td th:text="${walkingCompete.traceSum}"></td>
+                    <td th:text="${walkingCompete.invokeMethodSum}"></td>
+                    <td th:text="${walkingCompete.exceptionFlag} ? '是' : '否'"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </body>
+<script th:src="@{/js/jqery-3.7.1.js}"></script>
+<script th:src="@{/js/echarts.min-5.5.0.js}"></script>
+<script th:src="@{/js/layui.js}"></script>
+<script th:src="@{/js/common.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+    $(function (){
+        // tab 切换
+        $(".title-ul").find("li").click(function (){
+            $(".title-ul").find("li").each(function (){
+                $(this).removeClass("li-default");
+            });
+
+            // 添加样式
+            $(this).attr("class","li-default");
+            let dataType = $(this).attr("data-type");
+            if (dataType === "list") {
+                $(".data-list").show();
+                $("#chart-container").hide();
+            }else if (dataType === "histogram") {
+                $(".data-list").hide();
+                $("#chart-container").show();
+                // 初始化方法
+                initChart([[${serverHistogram}]]);
+            }
+        });
+
+        // 详情
+        $(".a-btn").click(function (){
+            let trNode = $(this).parent().parent();
+            $.get("/analyze/traceDetail", {"traceId": $(this).attr("data")}, function (resp){
+                if (resp.success) {
+                    let htm = "<tr><td colspan=\"10\">";
+                    $.each(resp.data, function (index, item){
+                        htm += "<div class=\"layui-timeline-item\">";
+                        if (index === 0) {
+                            if (item.methodName.indexOf("java.lang.Throwable:") >= 0) {
+                                htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-face-cry\"></i>";
+                            }else{
+                                htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-face-smile\"></i>";
+                            }
+                        }else if ((index+1) === (resp.data.length)) {
+                            htm += "<i class=\"layui-icon layui-anim layui-anim-rotate layui-anim-loop layui-timeline-axis\"></i>";
+                        }else{
+                            htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-fire\"></i>";
+                        }
+                        htm += "<div class=\"layui-timeline-content layui-text\"></div>";
+                        htm += "<div class=\"layui-timeline-title\"></div>";
+                        htm += "<ul>";
+                        htm += "<li>";
+                        htm += "<label>调用顺序：</label>";
+                        htm += "<span>" + item.invokeOrder + "</span>";
+                        htm += "</li>";
+                        htm += "<li>";
+                        htm += "<label>spanId：</label>";
+                        htm += "<span>" + item.spanId + "</span>";
+                        htm += "</li>";
+                        htm += "<li>";
+                        htm += "<label>调用时间：</label>";
+                        htm += "<span>" + (new Date(item.spanStartTime).Format("yyyy-MM-dd hh:mm:ss.S")) + "</span>";
+                        htm += "</li>";
+                        htm += "<li>";
+                        htm += "<label>子链路耗时(ms)：</label>";
+                        htm += "<span>" + item.spanTimeConsume + "</span>";
+                        htm += "</li>";
+                        htm += "<li>";
+                        htm += "<label>调用的方法：</label>";
+                        htm += "<span>" + item.methodName + "</span>";
+                        htm += "</li>";
+                        htm += "<li>";
+                        htm += "<label>所在的服务：</label>";
+                        htm += "<span>" + item.providerServerName + "</span>";
+                        htm += "</li>";
+                        htm += "</ul>";
+                        htm += "</div>";
+                        htm += "</div>";
+                        htm += "</div>";
+                    });
+                    htm += "</td></tr>";
+                    trNode.after(htm);
+                }
+            });
+        });
+    });
+
+    function initChart(objList) {
+        // 初始化函数
+        let xAxisData = [];
+        let seriesData = [];
+        $.each(objList, function(index, item){
+            xAxisData.push(item.serverName);
+            seriesData.push(item.invokeCount);
+        });
+
+        const myChart = echarts.init($("#chart-container")[0]);
+        const option = {
+            xAxis: {
+                type: 'category',
+                data: xAxisData
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    data: seriesData,
+                    type: 'bar'
+                }
+            ]
+        };
+
+        option && myChart.setOption(option);
+    }
+</script>
 </html>

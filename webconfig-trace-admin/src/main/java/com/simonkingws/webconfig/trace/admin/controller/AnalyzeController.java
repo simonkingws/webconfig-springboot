@@ -3,6 +3,7 @@ package com.simonkingws.webconfig.trace.admin.controller;
 import com.simonkingws.webconfig.common.core.JsonResult;
 import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
+import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingServer;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingCompeteService;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingMethodService;
@@ -70,4 +71,15 @@ public class AnalyzeController {
         return JsonResult.ofSuccess(competeList);
     }
 
+    /**
+     * 查询链路明细
+     *
+     * @author ws
+     * @date 2024/3/8 17:02
+     */
+    @GetMapping("/traceDetail")
+    public JsonResult<?> traceDetail(String traceId){
+        List<TraceWalkingMethod> methodList = traceWalkingMethodService.getMethodTraceList(traceId);
+        return JsonResult.ofSuccess(methodList);
+    }
 }

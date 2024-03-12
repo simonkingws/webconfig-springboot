@@ -25,7 +25,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         Object attribute = session.getAttribute(LoginConstant.LOGIN_USER);
         if (attribute == null) {
             // 用户未登录
-            response.sendRedirect(request.getContextPath() + "/login/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return false;
         }
 

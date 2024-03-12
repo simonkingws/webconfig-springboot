@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登录</title>
-  <style>
+  <style th:inline="text">
     body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background: url('../static/image/backgroud.jpg') no-repeat center center fixed;
+      background: url("[[@{/}]]image/backgroud.jpg") no-repeat center center fixed;
       background-size: cover;
     }
 
@@ -70,34 +70,34 @@
     </form>
   </div>
 </body>
-<script type="text/javascript" src="../static/js/jqery-3.7.1.js"></script>
+<script th:src="@{/js/jqery-3.7.1.js}"></script>
 <script type="text/javascript">
   $(function(){
-      // 注册
-      $(".register").click(function(){
-          let $submit = $("input[type='button']");
-          $submit.val("注册");
-          $submit.before('<label><input type="password" name="confirmPwd" placeholder="确认密码" required> </label>');
-          $("form").attr("action","/login/doRegister");
-          $("h2").text("注册");
-          $(".warning").hide();
-      });
+    // 注册
+    $(".register").click(function(){
+      let $submit = $("input[type='button']");
+      $submit.val("注册");
+      $submit.before('<label><input type="password" name="confirmPwd" placeholder="确认密码" required> </label>');
+      $("form").attr("action","/login/doRegister");
+      $("h2").text("注册");
+      $(".warning").hide();
+    });
 
-      // 登录/注册
-      $("input[type='button']").click(function () {
-          let url = $("form").attr("action");
-          $.post(url, $("form").serialize(), function (resp) {
-              if (resp.success) {
-                  if (url.indexOf("doRegister") > 0) {
-                      window.location.href = "/login/login";
-                  }else{
-                      window.location.href = "/login/index";
-                  }
-              }else{
-                  alert(resp.msg);
-              }
-          });
+    // 登录/注册
+    $("input[type='button']").click(function () {
+      let url = $("form").attr("action");
+      $.post(url, $("form").serialize(), function (resp) {
+        if (resp.success) {
+          if (url.indexOf("doRegister") > 0) {
+            window.location.href = "/login";
+          }else{
+            window.location.href = "/index";
+          }
+        }else{
+          alert(resp.msg);
+        }
       });
+    });
   });
 </script>
 </html>

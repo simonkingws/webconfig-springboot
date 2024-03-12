@@ -2,18 +2,19 @@ package com.simonkingws.webconfig.trace.admin.controller;
 
 import com.simonkingws.webconfig.common.core.JsonResult;
 import com.simonkingws.webconfig.trace.admin.constant.LoginConstant;
+import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingUser;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingUserService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,11 +29,12 @@ import java.util.Date;
  */
 @Validated
 @Controller
-@RequestMapping("/login")
 public class LoginController {
 
     @Autowired
     private TraceWalkingUserService traceWalkingUserService;
+    @Autowired
+    private AnalyzeController analyzeController;
 
     /**
      * 跳转登录页面
@@ -52,7 +54,14 @@ public class LoginController {
      * @date 2024/3/7 13:36
      */
     @GetMapping(value = {"", "/", "/index"})
-    public String index() {
+    public String index(Model model) {
+        // 加载服务调用的次数
+        JsonResult<?> serverHistogram = analyzeController.serverHistogram();
+        model.addAttribute("serverHistogram", serverHistogram.getData());
+
+        // 加载topx的数据
+        JsonResult<?> walkingCompeteResult = analyzeController.competeTopX(TraceWalkingDTO.empty());
+        model.addAttribute("walkingCompeteList", walkingCompeteResult.getData());
         return "index";
     }
 
@@ -62,7 +71,7 @@ public class LoginController {
      * @author ws
      * @date 2024/3/7 13:36
      */
-    @PostMapping("doLogin")
+    @PostMapping("/login/doLogin")
     @ResponseBody
     public JsonResult<?> doLogin(@NotBlank(message = "用户名不能为空！") String username,
                                  @NotBlank(message = "密码不能为空！") String password,
@@ -84,7 +93,7 @@ public class LoginController {
      * @author ws
      * @date 2024/3/7 14:43
      */
-    @PostMapping("doRegister")
+    @PostMapping("/login/doRegister")
     @ResponseBody
     public JsonResult<?> doRegister(@NotBlank(message = "用户名不能为空！") String username,
                                     @NotBlank(message = "密码不能为空！") String password,

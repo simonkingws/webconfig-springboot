@@ -16,16 +16,11 @@
         </ul>
         <div class="data-list">
             <table class="layui-table little-table">
-                <colgroup>
-                    <col>
-                    <col>
-                    <col>
-                </colgroup>
                 <thead>
-                <tr>
-                    <th>服务名称</th>
-                    <th>调用的次数</th>
-                </tr>
+                    <tr>
+                        <th>服务名称</th>
+                        <th>调用的次数</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr th:each="serviceStat: ${serverHistogram}">
@@ -92,19 +87,6 @@
             </div>
         </form>
         <table class="layui-table" th:fragment="walkingCompeteList">
-            <colgroup>
-                <col style="width: 80px;">
-                <col style="width: 285px;">
-                <col style="width: 120px;">
-                <col style="width: 120px;">
-                <col style="width: 160px;">
-                <col style="width: 160px;">
-                <col style="width: 120px;">
-                <col style="width: 150px;">
-                <col style="width: 120px;">
-                <col style="width: 100px;">
-                <col style="width: 100px;">
-            </colgroup>
             <thead>
                 <tr>
                     <th>序号</th>

@@ -4,60 +4,12 @@
     <meta charset="UTF-8">
     <title>链路统计</title>
     <link rel="stylesheet" th:href="@{/css/layui.css}" th:inline="css">
-    <style>
-        body {
-            margin: 10px 30px;
-            padding: 0;
-        }
-        p{
-            margin: 15px 0;
-            font-size: 16px;
-            border-bottom: 1px solid #d2d2d2;
-        }
-        .little-table{
-            width: 25%;
-        }
-        #chart-container {
-            position: relative;
-            height: 100vh;
-            max-height: 400px;
-            overflow: hidden;
-            display: none;
-        }
-        .li-default{
-            color: #16baaa;
-            border-bottom: 2px solid #16baaa;
-        }
-        .title-ul{
-            display: inline-block;
-        }
-        .title-ul li{
-            float: left;
-            text-align: center;
-            cursor: pointer;
-            width: 100px;
-            border-bottom: 1px solid #d2d2d2;
-        }
-        td ul {
-            border: 1px solid #16baaa;
-            padding: 5px 15px;
-            margin-left: 25px;
-            max-width: 600px;
-        }
-        td ul li {
-            margin-top: 5px;
-            list-style-type: none;
-        }
-        .a-btn{
-            cursor: pointer;
-            color: blue;
-            display: table-cell;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/index.css}" th:inline="css">
 </head>
 <body>
-    <div>
-        <p>服务调用的统计</p>
+    <div class="content-bottom content-title">trace-walking全链路统计信息</div>
+    <div class="content-bottom">
+        <p><span>服务调用的统计</span></p>
         <ul class="title-ul">
             <li class="li-default" data-type="list">列表</li>
             <li data-type="histogram">柱状图</li>
@@ -85,13 +37,61 @@
         </div>
         <div id="chart-container"></div>
     </div>
-    <div>
-        <p>服务调用的拓扑图</p>
-        <div></div>
+    <div class="content-bottom">
+        <p><span>服务调用的拓扑图</span></p>
+        <div id="graph-container"></div>
     </div>
-    <div>
-        <p>服务调用的链路</p>
-        <table class="layui-table">
+    <div class="content-bottom">
+        <p><span>服务调用的链路</span></p>
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">展示的链路数</label>
+                    <div class="layui-input-inline">
+                        <select name="topSum">
+                            <option value="10" selected>10条</option>
+                            <option value="30">30条</option>
+                            <option value="50">50条</option>
+                            <option value="100">100条</option>
+                            <option value="200">200条</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">traceId</label>
+                    <div class="layui-input-inline width-300">
+                        <input type="text" name="traceId" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">是否有异常链路</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="是" value="true">
+                        <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="否" value="false">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">链路调用的日期</label>
+                    <div class="layui-input-inline layui-input-wrap">
+                        <div class="layui-input-prefix">
+                            <i class="layui-icon layui-icon-date"></i>
+                        </div>
+                        <input type="text" name="invokeTimeStart" id="invokeTimeStart" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline layui-input-wrap">
+                        <div class="layui-input-prefix">
+                            <i class="layui-icon layui-icon-date"></i>
+                        </div>
+                        <input type="text" name="invokeTimeEnd" id="invokeTimeEnd" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item form-btn">
+                <input type="button" class="layui-btn" id="traceForm" value="查询">
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </form>
+        <table class="layui-table" th:fragment="walkingCompeteList">
             <colgroup>
                 <col style="width: 80px;">
                 <col style="width: 285px;">
@@ -124,7 +124,7 @@
                     <td th:text="${status.index+1}"></td>
                     <td th:inline="text">[[${walkingCompete.traceId}]]<a href="javascript:void(0);" class="a-btn" th:data="${walkingCompete.traceId}">[详细信息]</a></td>
                     <td th:text="${walkingCompete.traceStartPos}"></td>
-                    <td th:text="${walkingCompete.traceEndPos}"></td>
+                    <td th:text="${walkingCompete.traceEndPos}" th:class="${walkingCompete.exceptionFlag} ? 'td-waring' : ''"></td>
                     <td th:text="${walkingCompete.applicationName}"></td>
                     <td th:text="${#dates.format(walkingCompete.traceStartTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td th:text="${walkingCompete.traceTimeConsume}"></td>
@@ -162,27 +162,54 @@
             }
         });
 
+        // 初始化Graph
+        initGraph();
+
+        // 初始化表单
+        layui.use(['laydate'], function(){
+            let laydate = layui.laydate;
+
+            // 日期
+            laydate.render({elem: '#invokeTimeStart'});
+            laydate.render({elem: '#invokeTimeEnd'});
+        });
+
+        // 查询详细链路
+        $("#traceForm").click(function (){
+            let serialize = $("form").serialize();
+            let $input = $("input[name='exceptionFlag']:checked");
+            if ($input.length > 1) {
+                serialize = serialize.replaceAll("exceptionFlag=true", "").replaceAll("exceptionFlag=false", "")
+            }
+            $(".layui-table").load("/analyze/loadCompeteTopX?" + serialize);
+        });
+
         // 详情
-        $(".a-btn").click(function (){
+        $(".layui-table").delegate(".a-btn", "click", function (){
             let trNode = $(this).parent().parent();
+            let dataFlag = trNode.next().attr("class");
+            if (dataFlag === 'trace') {
+                return;
+            }
             $.get("/analyze/traceDetail", {"traceId": $(this).attr("data")}, function (resp){
                 if (resp.success) {
-                    let htm = "<tr><td colspan=\"10\">";
+                    let htm = "<tr class=\"trace\"><td colspan=\"10\">";
                     $.each(resp.data, function (index, item){
                         htm += "<div class=\"layui-timeline-item\">";
-                        if (index === 0) {
+                        if (index === 0 || resp.data.length === 1) {
                             if (item.methodName.indexOf("java.lang.Throwable:") >= 0) {
                                 htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-face-cry\"></i>";
                             }else{
                                 htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-face-smile\"></i>";
                             }
-                        }else if ((index+1) === (resp.data.length)) {
+                        }else if ((index+1) === resp.data.length) {
                             htm += "<i class=\"layui-icon layui-anim layui-anim-rotate layui-anim-loop layui-timeline-axis\"></i>";
                         }else{
                             htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-fire\"></i>";
                         }
-                        htm += "<div class=\"layui-timeline-content layui-text\"></div>";
-                        htm += "<div class=\"layui-timeline-title\"></div>";
+                        htm += "<div class=\"layui-timeline-content layui-text\">";
+                        htm += "<div class=\"div-time\">" + (new Date(item.methodStartTime).Format("yyyy-MM-dd hh:mm:ss.S")) +"</div>";
+                        htm += "<div class=\"layui-timeline-title\">";
                         htm += "<ul>";
                         htm += "<li>";
                         htm += "<label>调用顺序：</label>";
@@ -193,20 +220,16 @@
                         htm += "<span>" + item.spanId + "</span>";
                         htm += "</li>";
                         htm += "<li>";
-                        htm += "<label>调用时间：</label>";
-                        htm += "<span>" + (new Date(item.spanStartTime).Format("yyyy-MM-dd hh:mm:ss.S")) + "</span>";
-                        htm += "</li>";
-                        htm += "<li>";
-                        htm += "<label>子链路耗时(ms)：</label>";
-                        htm += "<span>" + item.spanTimeConsume + "</span>";
+                        htm += "<label>方法耗时(ms)：</label>";
+                        htm += "<span>" + item.methodTimeConsume + "</span>";
                         htm += "</li>";
                         htm += "<li>";
                         htm += "<label>调用的方法：</label>";
                         htm += "<span>" + item.methodName + "</span>";
                         htm += "</li>";
                         htm += "<li>";
-                        htm += "<label>所在的服务：</label>";
-                        htm += "<span>" + item.providerServerName + "</span>";
+                        htm += "<label>服务依赖：</label>";
+                        htm += "<span>" + item.consumerServerName +" -> "+ item.providerServerName + "</span>";
                         htm += "</li>";
                         htm += "</ul>";
                         htm += "</div>";
@@ -215,6 +238,9 @@
                     });
                     htm += "</td></tr>";
                     trNode.after(htm);
+
+                    // 初始化固定条
+                    initFixbar();
                 }
             });
         });
@@ -247,6 +273,82 @@
         };
 
         option && myChart.setOption(option);
+    }
+
+    function initFixbar() {
+        layui.use(function(){
+            var util = layui.util;
+            // 自定义固定条
+            util.fixbar({
+                bars: [{
+                    type: '收起链路详情',
+                    icon: 'layui-icon-up',
+                    style: 'background-color: #FF5722;'
+                }],
+                css: {right: 20, bottom: 200},
+                on: {
+                    mouseenter: function(type){
+                        layer.tips(type, this, {
+                            tips: 4,
+                            fixed: true
+                        });
+                    },
+                    mouseleave: function(type){
+                        layer.closeAll('tips');
+                    }
+                },
+                // 点击事件
+                click: function(type){
+                    if ("top" !== type) {
+                        $(".layui-table").find(".trace").remove();
+                        $(".layui-fixbar").remove();
+                    }
+                }
+            });
+        });
+    }
+
+    function initGraph(){
+        $.get("/analyze/topologyMap", {}, function (resp){
+            if (resp.success) {
+                let data = resp.data;
+
+                let chartDom = document.getElementById('graph-container');
+                let myChart = echarts.init(chartDom);
+                let option = {
+                    title: {
+                        text: '服务调用关系图'
+                    },
+                    animationDurationUpdate: 1500,
+                    animationEasingUpdate: 'quinticInOut',
+                    series: [
+                        {
+                            type: 'graph',
+                            layout: 'none',
+                            symbolSize: 50,
+                            roam: true,
+                            label: {
+                                show: true
+                            },
+                            edgeSymbol: ['circle', 'arrow'],
+                            edgeSymbolSize: [4, 10],
+                            edgeLabel: {
+                                fontSize: 20
+                            },
+                            data: data.itemList,
+                            links: data.refList,
+                            lineStyle: {
+                                opacity: 0.9,
+                                width: 2,
+                                curveness: 0
+                            }
+                        }
+                    ]
+                };
+
+                option && myChart.setOption(option);
+            }
+        });
     }
 </script>
 </html>

@@ -1,21 +1,23 @@
 package com.simonkingws.webconfig.trace.admin.controller;
 
 import com.simonkingws.webconfig.common.core.JsonResult;
-import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
-import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingServer;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingCompeteService;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingMethodService;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingServerService;
+import com.simonkingws.webconfig.trace.admin.vo.GraphItemVO;
+import com.simonkingws.webconfig.trace.admin.vo.GraphRelVO;
+import com.simonkingws.webconfig.trace.admin.vo.GraphVO;
 import com.simonkingws.webconfig.trace.admin.vo.ServerInvokeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * 分析采集的链路数据
@@ -44,7 +46,8 @@ public class AnalyzeController {
     @GetMapping("/topologyMap")
     public JsonResult<?> topologyMap(){
         List<TraceWalkingServer> serverList = traceWalkingServerService.getAllServerList();
-        return JsonResult.ofSuccess(serverList);
+        GraphVO vo = handler2Gragh(serverList);
+        return JsonResult.ofSuccess(vo);
     }
 
     /**
@@ -60,18 +63,6 @@ public class AnalyzeController {
     }
 
     /**
-     * 根据条件获取Topx的数据
-     *
-     * @author ws
-     * @date 2024/3/7 11:17
-     */
-    @GetMapping("/competeTopX")
-    public JsonResult<?> competeTopX(TraceWalkingDTO traceWalkingDto){
-        List<TraceWalkingCompete> competeList = traceWalkingCompeteService.getCompeteByCondition(traceWalkingDto);
-        return JsonResult.ofSuccess(competeList);
-    }
-
-    /**
      * 查询链路明细
      *
      * @author ws
@@ -81,5 +72,40 @@ public class AnalyzeController {
     public JsonResult<?> traceDetail(String traceId){
         List<TraceWalkingMethod> methodList = traceWalkingMethodService.getMethodTraceList(traceId);
         return JsonResult.ofSuccess(methodList);
+    }
+
+    private GraphVO handler2Gragh(List<TraceWalkingServer> serverList) {
+        if (CollectionUtils.isEmpty(serverList)) {
+            return null;
+        }
+
+        List<String> distinctList = new ArrayList<>();
+        serverList.forEach(item -> {
+            if (!distinctList.contains(item.getCallerServerName())) {
+                distinctList.add(item.getCallerServerName());
+            }
+            if (!distinctList.contains(item.getCalleeServerName())) {
+                distinctList.add(item.getCalleeServerName());
+            }
+        });
+        int size = distinctList.size();
+        // 根据总数计算刻度
+        double degree = 360.0 / size;
+
+        // 排列节点的位置
+        List<GraphItemVO> itemList = new ArrayList<>();
+        for (int i = 1; i <= size; i++) {
+            long x = Math.round(300 + 300 * Math.cos(Math.toRadians(degree * i)));
+            long y = Math.round(300 + 300 * Math.sin(Math.toRadians(degree * i)));
+            itemList.add(new GraphItemVO(distinctList.get(i-1), (int)x, (int)y));
+        }
+
+        // 增加关联关系
+        List<GraphRelVO> refList = new ArrayList<>();
+        serverList.forEach(item -> {
+            refList.add(new GraphRelVO(item.getCallerServerName(), item.getCalleeServerName()));
+        });
+
+        return new GraphVO(itemList, refList);
     }
 }

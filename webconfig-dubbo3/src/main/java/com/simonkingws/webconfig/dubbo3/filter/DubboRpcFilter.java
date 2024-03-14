@@ -69,6 +69,8 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
                 if (BooleanUtils.isTrue(local.getOpenTraceCollect())) {
                     log.info(">>>>>Dubbo调用-链路信息采集启用中......");
                     TraceItem traceItem = TraceItem.copy2TraceItem(local);
+                    traceItem.setSpanId(Instant.now().toEpochMilli());
+                    traceItem.setInvokeStartTime(traceItem.getSpanId());
                     traceItem.setMethodName(invokeMethodName);
                     traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
                     traceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
@@ -94,17 +96,25 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
                     List<TraceItem> traceItems = TraceContextHolder.getTraceItems();
                     TraceItem traceItem = traceItems.get(0);
                     String traceId = traceItem.getTraceId();
-                    traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+                    traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
+                    traceItem.setSpanEndMs(traceItem.getInvokeEndTime());
+
+                    // 内部方法调用需要补全spanEndMs
+                    traceItems.stream().filter(item -> item.getSpanEndMs() == null).forEach(item -> {
+                        item.setSpanEndMs(traceItem.getSpanEndMs());
+                    });
 
                     // 如果链路中没有异常的链路，则将dubbo的链路异常加入
                     if (appResponse.hasException() && !TraceContextHolder.hasException()) {
                         // 创建异常链路
                         TraceItem exTraceItem = TraceItem.builder().build();
                         BeanUtils.copyProperties(traceItem, exTraceItem);
+                        traceItem.setInvokeStartTime(Instant.now().toEpochMilli());
                         exTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
                         exTraceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
                         exTraceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
-
+                        exTraceItem.setInvokeEndTime(Instant.now().toEpochMilli());
+                        exTraceItem.setSpanEndMs(exTraceItem.getInvokeEndTime());
                         traceItems.add(exTraceItem);
                     }
 

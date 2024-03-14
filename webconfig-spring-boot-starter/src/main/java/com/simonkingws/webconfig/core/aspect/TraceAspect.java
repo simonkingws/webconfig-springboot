@@ -95,6 +95,7 @@ public class TraceAspect {
         local.setTraceSum(traceSum);
 
         TraceItem traceItem = TraceItem.copy2TraceItem(local);
+        traceItem.setInvokeStartTime(Instant.now().toEpochMilli());
         traceItem.setConsumerApplicatName(applicationName);
         traceItem.setProviderApplicatName(applicationName);
         traceItem.setMethodName(methodName);
@@ -105,18 +106,20 @@ public class TraceAspect {
             // 执行方法
             proceed = joinPoint.proceed();
 
-            traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+            traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
             traceItemList.add(traceItem);
         }catch (Throwable th){
             // 有异常需要记录异常的链路信息，并将异常抛出
             try {
-                traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+                traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
                 traceItemList.add(traceItem);
 
                 // 增肌异常信息的处理
                 TraceItem exceptionTraceItem = TraceItem.builder().build();
                 BeanUtils.copyProperties(traceItem, exceptionTraceItem);
+                exceptionTraceItem.setInvokeStartTime(Instant.now().toEpochMilli());
                 exceptionTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + th.getMessage());
+                traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
                 traceItemList.add(exceptionTraceItem);
             }catch (Exception e){
                 log.warn("处理@InnerTrace注解异常：", e);

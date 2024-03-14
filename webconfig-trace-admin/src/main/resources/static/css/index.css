@@ -1,0 +1,94 @@
+body {
+    margin: 10px 30px;
+    padding: 0;
+    background: url("/image/backgroud-index.jpg") no-repeat center center fixed;
+    background-size: cover;
+}
+.content-bottom{
+    margin-bottom: 50px;
+}
+p{
+    margin: 15px 0;
+    font-size: 16px;
+    border-bottom: 1px solid #16baaa;
+    padding-bottom: 8px;
+}
+p span {
+    padding: 10px 10px;
+    background: #16baaa;
+}
+.little-table{
+    width: 25%;
+}
+#chart-container {
+    position: relative;
+    height: 100vh;
+    max-height: 400px;
+    overflow: hidden;
+    display: none;
+}
+.li-default{
+    color: #16baaa;
+    border-bottom: 2px solid #16baaa !important;
+}
+.title-ul{
+    display: inline-block;
+}
+.title-ul li{
+    float: left;
+    text-align: center;
+    cursor: pointer;
+    width: 100px;
+    border-bottom: 1px solid #d2d2d2;
+}
+td ul {
+    border: 1px solid #16baaa;
+    padding: 5px 15px;
+    max-width: 600px;
+}
+td ul li {
+    margin-top: 5px !important;
+    list-style-type: none !important;
+}
+td ul label {
+    text-align: right;
+    display: inline-block;
+    width: 115px;
+    color: #d2d2d2;
+}
+.a-btn{
+    cursor: pointer;
+    color: blue;
+    display: table-cell;
+}
+.div-time{
+    font-size: 16px;
+    font-weight: bolder;
+    color: darkmagenta;
+}
+#graph-container {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    max-height: 500px;
+}
+.content-title{
+    font-size: 18px;
+    text-align: center;
+    font-weight: bolder;
+}
+.layui-form-label{
+    width: 100px;
+}
+.layui-input-block{
+    width: 220px;
+}
+.form-btn{
+    margin-left: 22px;
+}
+.width-300{
+    width: 300px !important;
+}
+.td-waring{
+    color: coral;
+}

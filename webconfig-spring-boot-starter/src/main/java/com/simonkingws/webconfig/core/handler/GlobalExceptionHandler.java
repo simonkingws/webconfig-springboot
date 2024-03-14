@@ -184,10 +184,12 @@ public class GlobalExceptionHandler {
             String applicationName = SpringContextHolder.getApplicationName();
 
             TraceItem traceItem = TraceItem.copy2TraceItem(local);
+            traceItem.setInvokeStartTime(Instant.now().toEpochMilli());
             traceItem.setConsumerApplicatName(applicationName);
             traceItem.setProviderApplicatName(applicationName);
             traceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + errorMsg);
-            traceItem.setSpanEndMs(Instant.now().toEpochMilli());
+            traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
+            traceItem.setSpanEndMs(traceItem.getInvokeEndTime());
 
             TraceContextHolder.addTraceItem(traceItem);
         }catch (Exception e){

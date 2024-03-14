@@ -83,7 +83,15 @@ public class RequestContextInterceptor implements HandlerInterceptor {
             try {
                 // 补充首次进入链路信息的结束时间
                 if (TraceContextHolder.isNotEmpty()) {
-                    TraceContextHolder.getTraceItems().get(0).setSpanEndMs(Instant.now().toEpochMilli());
+                    TraceItem traceItem = TraceContextHolder.getTraceItems().get(0);
+                    traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
+                    traceItem.setSpanEndMs(traceItem.getInvokeEndTime());
+
+                    // 内部方法调用需要补全spanEndMs
+                    TraceContextHolder.getTraceItems().stream().filter(item -> item.getSpanEndMs() == null).forEach(item -> {
+                        item.setSpanEndMs(traceItem.getSpanEndMs());
+                    });
+
                     stringRedisTemplate.opsForList().rightPushAll(local.getTraceId(), TraceContextHolder.toStringList());
 
                     TraceContextHolder.remove();
@@ -104,6 +112,7 @@ public class RequestContextInterceptor implements HandlerInterceptor {
             String applicationName = SpringContextHolder.getApplicationName();
 
             TraceItem traceItem = TraceItem.copy2TraceItem(requestContextLocal);
+            traceItem.setInvokeStartTime(Instant.now().toEpochMilli());
             traceItem.setConsumerApplicatName(consumerApplicationName);
             traceItem.setProviderApplicatName(applicationName);
             traceItem.setMethodName(feignMethodName);

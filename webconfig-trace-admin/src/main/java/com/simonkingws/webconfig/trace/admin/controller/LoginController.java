@@ -3,7 +3,9 @@ package com.simonkingws.webconfig.trace.admin.controller;
 import com.simonkingws.webconfig.common.core.JsonResult;
 import com.simonkingws.webconfig.trace.admin.constant.LoginConstant;
 import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
+import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingUser;
+import com.simonkingws.webconfig.trace.admin.service.TraceWalkingCompeteService;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingUserService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 登录控制层
@@ -33,6 +36,8 @@ public class LoginController {
 
     @Autowired
     private TraceWalkingUserService traceWalkingUserService;
+    @Autowired
+    private TraceWalkingCompeteService traceWalkingCompeteService;
     @Autowired
     private AnalyzeController analyzeController;
 
@@ -60,8 +65,8 @@ public class LoginController {
         model.addAttribute("serverHistogram", serverHistogram.getData());
 
         // 加载topx的数据
-        JsonResult<?> walkingCompeteResult = analyzeController.competeTopX(TraceWalkingDTO.empty());
-        model.addAttribute("walkingCompeteList", walkingCompeteResult.getData());
+        List<TraceWalkingCompete> competeList = traceWalkingCompeteService.getCompeteByCondition(TraceWalkingDTO.empty());
+        model.addAttribute("walkingCompeteList", competeList);
         return "index";
     }
 

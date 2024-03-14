@@ -57,6 +57,7 @@ public class TraceConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**")
                 .excludePathPatterns("/css/**","/js/**","/image/**", "/favicon.ico", "/font/**")
-                .excludePathPatterns("/login","/login/**");
+                .excludePathPatterns("/login","/login/**")
+                .excludePathPatterns("/trace/**");
     }
 }

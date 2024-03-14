@@ -39,10 +39,13 @@ public class TraceWalkingMethodServiceImpl implements TraceWalkingMethodService 
             method.setSpanId(item.getSpanId().toString());
             method.setSpanStartTime(new Date(item.getSpanId()));
             method.setSpanEndTime(new Date(item.getSpanEndMs()));
+            method.setSpanTimeConsume((int)(item.getSpanEndMs() - item.getSpanId()));
             method.setConsumerServerName(item.getConsumerApplicatName());
             method.setProviderServerName(item.getProviderApplicatName());
             method.setMethodName(item.getMethodName());
-            method.setSpanTimeConsume((int)(item.getSpanEndMs() - item.getSpanId()));
+            method.setMethodStartTime(new Date(item.getInvokeStartTime()));
+            method.setMethodEndTime(new Date(item.getInvokeEndTime()));
+            method.setMethodTimeConsume((int)(item.getInvokeEndTime() - item.getInvokeStartTime()));
             method.setInvokeOrder(item.getOrder());
             method.setCreatedTime(new Date());
 

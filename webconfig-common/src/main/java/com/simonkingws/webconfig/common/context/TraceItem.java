@@ -29,6 +29,16 @@ public class TraceItem implements Serializable {
     private Long spanId;
 
     /**
+     *  当前方法的开始调用时间
+     */
+    private Long invokeStartTime;
+
+    /**
+     *  当前方法的结束调用时间
+     */
+    private Long invokeEndTime;
+
+    /**
      *  子链路结束时间
      */
     private Long spanEndMs;

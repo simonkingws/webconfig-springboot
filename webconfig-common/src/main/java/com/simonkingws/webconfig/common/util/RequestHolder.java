@@ -129,9 +129,11 @@ public class RequestHolder {
         // 构建初始化的方法
         TraceItem traceBegin = TraceItem.copy2TraceItem(local);
         traceBegin.setOrder(0);
+        traceBegin.setInvokeStartTime(traceBegin.getSpanId());
         traceBegin.setMethodName(local.getStartPos());
         traceBegin.setConsumerApplicatName(applicationName);
         traceBegin.setProviderApplicatName(applicationName);
+        traceBegin.setInvokeEndTime(local.getTraceEndMs());
         traceBegin.setSpanEndMs(local.getTraceEndMs());
 
         List<TraceItem> traceItemList = new LinkedList<>();

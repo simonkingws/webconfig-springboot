@@ -56,6 +56,21 @@ public class TraceWalkingMethod implements Serializable {
     private Integer spanTimeConsume;
 
     /**
+     * 方法调用的开始时间
+     */
+    private Date methodStartTime;
+
+    /**
+     * 方法调用的结束时间
+     */
+    private Date methodEndTime;
+
+    /**
+     * 方法调用的耗时（单位：毫秒）
+     */
+    private Integer methodTimeConsume;
+
+    /**
      * 方法所在消费端服务的名称
      */
     private String consumerServerName;

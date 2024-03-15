@@ -3,7 +3,6 @@ package com.simonkingws.webconfig.trace.admin.controller;
 import com.simonkingws.webconfig.common.core.JsonResult;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingServer;
-import com.simonkingws.webconfig.trace.admin.service.TraceWalkingCompeteService;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingMethodService;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingServerService;
 import com.simonkingws.webconfig.trace.admin.vo.GraphItemVO;
@@ -17,7 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 分析采集的链路数据
@@ -34,8 +34,6 @@ public class AnalyzeController {
     private TraceWalkingServerService traceWalkingServerService;
     @Autowired
     private TraceWalkingMethodService traceWalkingMethodService;
-    @Autowired
-    private TraceWalkingCompeteService traceWalkingCompeteService;
 
     /**
      * 服务拓扑图的数据

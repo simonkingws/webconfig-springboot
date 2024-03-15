@@ -28,10 +28,10 @@ JDK1.8+，redis，springboot2.x，dubbo3.x
 * feign调用下的全局参数
 * Date参数传递时差问题统一处理
 
-### webconfig-demo
+### webconfig-demo 特性
 * 应用实例以及case
 
-### webconfig-trace-admin
+### webconfig-trace-admin 特性
 * 链路追踪的服务，提供webui
 
 ### 使用说明以以及更新日志

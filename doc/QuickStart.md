@@ -307,6 +307,11 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 
 ### 4、更新日志
 
+### webconfig-trace-admin v1.0.0 @2024-03-15
+* [新增]`webconfig-trace-admin`链路追踪的webui
+* [优化]优化链路追踪的字段
+* [优化]更新文档
+
 ### v1.0.1 @2024-02-29
 * [新增]新增链路信息的采集接口的配置
 * [优化]链路收集过程的方式

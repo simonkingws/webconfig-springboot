@@ -305,7 +305,13 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 * java.util.Date
 * java.time.LocalDateTime 兼容jdk8
 
-### 4、更新日志
+### 4、webconfig-trace-admin
+* 提供webUI的能力
+* 默认登录账号：trace/trace
+* 访问地址：ip/域名+端口
+
+
+### 5、更新日志
 
 ### webconfig-trace-admin v1.0.0 @2024-03-15
 * [新增]`webconfig-trace-admin`链路追踪的webui

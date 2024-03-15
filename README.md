@@ -31,6 +31,9 @@ JDK1.8+，redis，springboot2.x，dubbo3.x
 ### webconfig-demo
 * 应用实例以及case
 
+### webconfig-trace-admin
+* 链路追踪的服务，提供webui
+
 ### 使用说明以以及更新日志
 详见：https://github.com/simonkingws/webconfig-springboot/blob/main/doc/QuickStart.md
 

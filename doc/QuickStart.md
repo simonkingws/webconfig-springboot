@@ -365,16 +365,15 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 
 
 ### 5、更新日志
-### webconfig-trace-admin v1.0.0 @2024-03-18
-### webconfig-spring-boot-starter v1.0.0 @2024-03-18
+### v1.0.1 @2024-03-18
 * [优化]`webconfig-trace-admin` 完整链路增加用户的信息以及索引
 * [新增]`webconfig-spring-boot-starter` 增加`@PrintParams` 打印请求参数的注解
-* [新增]`webconfig-spring-boot-starter` 增加`arthasz` 在线运维的功能
+* [新增]`webconfig-spring-boot-starter` 增加`arthas` 在线运维的功能
 * [优化]`webconfig-demo` 增加测试case 
 * [优化]更新文档
 
 
-### webconfig-trace-admin v1.0.0 @2024-03-15
+### v1.0.1 @2024-03-15
 * [新增]`webconfig-trace-admin`链路追踪的webui
 * [新增]新增`@SubmitLimiting` 注解
 * [优化]优化链路追踪的字段

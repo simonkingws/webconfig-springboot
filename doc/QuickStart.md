@@ -324,12 +324,12 @@ public class WebconfigProperies {
 > java -jar arthas-tunnel-server.jar --arthas.enable-detail-pages=true
 
 如果需要修改其他参数，可以`--参数`修改。
-![img.png](arthas-manage.png)
+![arthas-manage.png](https://s2.loli.net/2024/03/18/Xdcm2fTW6tuOZae.png)
 页面通过AgentId来建立连接。自定义AgentId需要记住AgentId名称，方便连接。系统自动生成可以使用管理页面。
 
 管理页面：http://ip:port/apps.html
-![img.png](apps.png)
-![img.png](detail.png)
+![apps.png](https://s2.loli.net/2024/03/18/8NzWswuchrMOlUt.png)
+![detail.png](https://s2.loli.net/2024/03/18/r8tqBpoCxXIevjK.png)
 
 `自定义的AgentId管理页面获取不到，是因为管理页面通过下划线（_）分割的，系统生成的时会默认通过下划线连接`。
 

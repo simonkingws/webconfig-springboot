@@ -34,8 +34,8 @@ JDK1.8+，redis，springboot2.x，dubbo3.x
 
 ### webconfig-trace-admin 特性
 * 链路追踪的服务，提供webui
-![img.png](doc/trace.png)
-![img.png](doc/trace-detail.png)
+![trace.png](https://s2.loli.net/2024/03/18/po2SYIsVucDUMrW.png)
+![trace-detail.png](https://s2.loli.net/2024/03/18/ErYn5LmNgKV2cjD.png)
 
 ### 使用说明以以及更新日志
 详见：https://github.com/simonkingws/webconfig-springboot/blob/main/doc/QuickStart.md

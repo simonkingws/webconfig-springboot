@@ -166,6 +166,12 @@ public class RequestHolder {
         // 重排序
         nomalList.sort(Comparator.comparing(TraceItem::getOrder));
 
+        // 补充用户信息
+        nomalList.forEach(item -> {
+            item.setUserId(local.getUserId());
+            item.setUserName(local.getUserName());
+        });
+
         return nomalList;
     }
 

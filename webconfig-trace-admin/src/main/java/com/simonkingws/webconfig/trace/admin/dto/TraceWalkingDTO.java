@@ -31,6 +31,9 @@ public class TraceWalkingDTO implements Serializable {
     /** 查询的条数 */
     private Integer topSum;
 
+    /** 用户的ID */
+    private String userId;
+
     public static TraceWalkingDTO empty() {
         return new TraceWalkingDTO();
     }

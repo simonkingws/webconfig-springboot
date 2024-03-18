@@ -278,9 +278,62 @@ public class WebconfigProperies {
      */
     private Boolean openTraceCollect = false;
 
+    /**
+     * 链路信息采集的地址：IP/域名:PORT
+     */
+    private String traceCollectAddress;
+
+    /**
+     * 请求的协议，默认http
+     */
+    private String protocol = "http";
+
+    /**
+     * arthas 是否开启,默认关闭。关闭状态可以使用arthas的原生配置
+     */
+    private Boolean arthasOpen = false;
+
+    /**
+     * arthas 服务唯一标识：默认是为空，系统自动生成。
+     * <pre>
+     *     通过 http://localhost:8080/apps.html 可以查看
+     * </pre>
+     */
+    private String arthasAgentId;
+
+    /**
+     * arthas 服务地址
+     */
+    private String arthasTunnelServer;
+
 }
 ```
 > 配置类的前缀为`springboot.webconfig`,可以在配置文件中自行配置。大部分配置类有默认值，用户可以通过配置自行修改。
+##### 1.8.1 arthas相关说明
+* arthasOpen 默认关闭。关闭状态可以自行使用arthas的配置
+* arthasAgentId 默认为空，系统自动生成。客户端（`Arthas Tunnel`）统一管理，启动后可以通过`ip:port/apps.html`统一管理查看。
+* arthasTunnelServer 客户端服务地址，例：`ws://127.0.0.1:7777/ws`。其中端口7777是客户端的默认端口
+##### 1.8.2 远程管理客户端使用注意（`Arthas Tunnel`）
+> 下载资源：https://github.com/alibaba/arthas/releases
+> 使用文档：https://arthas.aliyun.com/doc/tunnel.html
+
+客户端提供管理页面，但是没有权限控制。默认是关闭页面的，使用时需要开启，并注意权限控制，最好外网不能访问。
+客户端启动(开启页面管理)：
+> 开启页面管理参数：arthas.enable-detail-pages=true
+
+> java -jar arthas-tunnel-server.jar --arthas.enable-detail-pages=true
+
+如果需要修改其他参数，可以`--参数`修改。
+![img.png](arthas-manage.png)
+页面通过AgentId来建立连接。自定义AgentId需要记住AgentId名称，方便连接。系统自动生成可以使用管理页面。
+
+管理页面：http://ip:port/apps.html
+![img.png](apps.png)
+![img.png](detail.png)
+
+`自定义的AgentId管理页面获取不到，是因为管理页面通过下划线（_）分割的，系统生成的时会默认通过下划线连接`。
+
+无法查看Agent管理时，可以通过`http://localhost:8080/actuator/arthas` 查看。
 
 
 ### 2、webconfig-dubbo3
@@ -312,9 +365,18 @@ Filter类：`com.simonkingws.webconfig.dubbo3.filter.DubboRpcFilter`
 
 
 ### 5、更新日志
+### webconfig-trace-admin v1.0.0 @2024-03-18
+### webconfig-spring-boot-starter v1.0.0 @2024-03-18
+* [优化]`webconfig-trace-admin` 完整链路增加用户的信息以及索引
+* [新增]`webconfig-spring-boot-starter` 增加`@PrintParams` 打印请求参数的注解
+* [新增]`webconfig-spring-boot-starter` 增加`arthasz` 在线运维的功能
+* [优化]`webconfig-demo` 增加测试case 
+* [优化]更新文档
+
 
 ### webconfig-trace-admin v1.0.0 @2024-03-15
 * [新增]`webconfig-trace-admin`链路追踪的webui
+* [新增]新增`@SubmitLimiting` 注解
 * [优化]优化链路追踪的字段
 * [优化]更新文档
 

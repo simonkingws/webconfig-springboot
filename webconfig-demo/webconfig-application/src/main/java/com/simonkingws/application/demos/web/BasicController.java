@@ -3,6 +3,8 @@ package com.simonkingws.application.demos.web;
 import com.simonkingws.api.service.BookService;
 import com.simonkingws.api.service2.Book2Service;
 import com.simonkingws.webconfig.common.constant.DateFormatConstant;
+import com.simonkingws.webconfig.common.util.RequestHolder;
+import com.simonkingws.webconfig.core.annotation.PrintParams;
 import com.simonkingws.webconfig.core.annotation.RequestLimiting;
 import com.simonkingws.webconfig.core.annotation.SubmitLimiting;
 import com.simonkingws.webconfig.core.contant.Policy;
@@ -41,7 +43,10 @@ public class BasicController {
      * 测试Form表单提交
      */
     @RequestMapping("/testFormData")
+    @PrintParams
     public String testFormData(@Valid Book book){
+        RequestHolder.get().setUserId("123456");
+        RequestHolder.get().setUserName("test");
         System.out.println(book);
         System.out.println(DateTimeFormatter.ofPattern(DateFormatConstant.STANDARD_DATE_TIME).format(book.getFinishDateTime()));
         return "success";

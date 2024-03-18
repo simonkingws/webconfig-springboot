@@ -3,9 +3,12 @@ package com.simonkingws.webconfig.core.config;
 import com.simonkingws.webconfig.common.constant.SymbolConstant;
 import com.simonkingws.webconfig.common.core.WebconfigProperies;
 import com.simonkingws.webconfig.core.Interceptor.RequestContextInterceptor;
+import com.taobao.arthas.agent.attach.ArthasAgent;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +21,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 自动装配
@@ -33,10 +39,14 @@ import javax.validation.ValidatorFactory;
 @ComponentScan("com.simonkingws.webconfig")
 public class WebconfigAutoConfigration implements WebMvcConfigurer {
 
+    @Value("${spring.application.name:boot-server}")
+    private String applicationName;
+
     @Autowired
     private WebconfigProperies webconfigProperies;
     @Autowired
     private RequestContextInterceptor requestContextIntercepter;
+
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -68,5 +78,16 @@ public class WebconfigAutoConfigration implements WebMvcConfigurer {
     @Bean
     public RestTemplate restTemplate(){
         return new RestTemplate();
+    }
+
+    @PostConstruct
+    public void initArthasAgent() {
+        if (BooleanUtils.isTrue(webconfigProperies.getArthasOpen())) {
+            Map<String, String> configMap = new HashMap<>();
+            configMap.put("arthas.agentId", webconfigProperies.getArthasAgentId());
+            configMap.put("arthas.appName", applicationName);
+            configMap.put("arthas.tunnelServer", webconfigProperies.getArthasTunnelServer());
+            ArthasAgent.attach(configMap);
+        }
     }
 }

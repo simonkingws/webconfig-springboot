@@ -81,6 +81,16 @@ public class TraceWalkingCompete implements Serializable {
     private Boolean exceptionFlag;
 
     /**
+     * 调用链路的用户ID
+     */
+    private String userId;
+
+    /**
+     * 调用链路的用户姓名
+     */
+    private String userName;
+
+    /**
      * 创建时间
      */
     private Date createdTime;

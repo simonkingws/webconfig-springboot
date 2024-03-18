@@ -28,9 +28,13 @@ CREATE TABLE IF NOT EXISTS `trace_walking_compete` (
   `trace_sum` int(11) DEFAULT '0' COMMENT '链路数',
   `invoke_method_sum` int(11) DEFAULT '0' COMMENT '调用的方法数（包含异常方法）',
   `exception_flag` tinyint(1) DEFAULT '0' COMMENT '是否有异常（0：否 1：是）',
+  `user_id` varchar(50) DEFAULT 'anonymous' COMMENT '调用链路的用户ID',
+  `user_name` varchar(50) DEFAULT 'anonymous' COMMENT '调用链路的用户姓名',
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  KEY `idx_trace_id` (`trace_id`) USING BTREE
+  KEY `idx_user_id` (`user_id`) USING BTREE,
+  KEY `idx_trace_id` (`trace_id`) USING BTREE,
+  KEY `idx_trace_start_time` (`trace_start_time`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='完整的链路信息';
 
 -- ----------------------------

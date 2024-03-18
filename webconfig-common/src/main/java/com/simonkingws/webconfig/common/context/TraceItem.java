@@ -63,6 +63,16 @@ public class TraceItem implements Serializable {
      */
     private Integer order;
 
+    /**
+     *  当前用户ID
+     */
+    private String userId;
+
+    /**
+     *  当前用户姓名
+     */
+    private String userName;
+
     @Tolerate
     public TraceItem() {
 

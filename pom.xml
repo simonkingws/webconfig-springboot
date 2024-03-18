@@ -27,6 +27,7 @@
         <dubbo.version>3.1.11</dubbo.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <fastjson2.version>2.0.27</fastjson2.version>
+        <arthas-starter.version>3.7.2</arthas-starter.version>
 
         <!--发布到中央仓库配置-->
         <project-url>https://github.com/simonkingws/webconfig-springboot.git</project-url>
@@ -76,6 +77,11 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.taobao.arthas</groupId>
+                <artifactId>arthas-spring-boot-starter</artifactId>
+                <version>${arthas-starter.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>

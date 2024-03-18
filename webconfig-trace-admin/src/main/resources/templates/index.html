@@ -41,7 +41,7 @@
         <form class="layui-form">
             <div class="layui-form-item">
                 <div class="layui-inline">
-                    <label class="layui-form-label">展示的链路数</label>
+                    <label class="layui-form-label">展示的链路数：</label>
                     <div class="layui-input-inline">
                         <select name="topSum">
                             <option value="10" selected>10条</option>
@@ -53,20 +53,26 @@
                     </div>
                 </div>
                 <div class="layui-inline">
-                    <label class="layui-form-label">traceId</label>
+                    <label class="layui-form-label">traceId：</label>
                     <div class="layui-input-inline width-300">
                         <input type="text" name="traceId" autocomplete="off" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-inline">
-                    <label class="layui-form-label">是否有异常链路</label>
+                    <label class="layui-form-label">链路调用的用户ID：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="userId" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">是否有异常链路：</label>
                     <div class="layui-input-block">
                         <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="是" value="true">
                         <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="否" value="false">
                     </div>
                 </div>
                 <div class="layui-inline">
-                    <label class="layui-form-label">链路调用的日期</label>
+                    <label class="layui-form-label">链路调用的日期：</label>
                     <div class="layui-input-inline layui-input-wrap">
                         <div class="layui-input-prefix">
                             <i class="layui-icon layui-icon-date"></i>
@@ -98,6 +104,7 @@
                     <th>耗时(ms)</th>
                     <th>总链路数</th>
                     <th>调用的方法数</th>
+                    <th>链路调用的用户</th>
                     <th>是否有异常</th>
                 </tr>
             </thead>
@@ -112,6 +119,10 @@
                     <td th:text="${walkingCompete.traceTimeConsume}"></td>
                     <td th:text="${walkingCompete.traceSum}"></td>
                     <td th:text="${walkingCompete.invokeMethodSum}"></td>
+                    <td th:inline="text">
+                        用户ID： [[${walkingCompete.userId}]]<br>
+                        用户姓名： [[${walkingCompete.userName}]]
+                    </td>
                     <td th:text="${walkingCompete.exceptionFlag} ? '是' : '否'"></td>
                 </tr>
             </tbody>

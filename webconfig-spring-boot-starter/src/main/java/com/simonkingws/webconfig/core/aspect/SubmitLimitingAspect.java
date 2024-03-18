@@ -85,12 +85,13 @@ public class SubmitLimitingAspect {
     public void afterThrowing()  {
         // 方法内部出现异常，需要清除缓存
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        assert requestAttributes != null;
-        HttpServletRequest request = requestAttributes.getRequest();
+        if (requestAttributes != null) {
+            HttpServletRequest request = requestAttributes.getRequest();
 
-        // 清除缓存，允许重复执行
-        String cacheKey = String.format(RedisConstant.CACHE_KEY, request.getHeader(RequestHeaderConstant.ONCE_ACCESS_TOKEN));
-        CacheResolver cacheResolver = cacheResolverMap.get(webconfigProperies.getRequestLimitCacheMode());
-        cacheResolver.remove(cacheKey);
+            // 清除缓存，允许重复执行
+            String cacheKey = String.format(RedisConstant.CACHE_KEY, request.getHeader(RequestHeaderConstant.ONCE_ACCESS_TOKEN));
+            CacheResolver cacheResolver = cacheResolverMap.get(webconfigProperies.getRequestLimitCacheMode());
+            cacheResolver.remove(cacheKey);
+        }
     }
 }

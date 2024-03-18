@@ -65,4 +65,22 @@ public class WebconfigProperies {
      */
     private String protocol = "http";
 
+    /**
+     * arthas 是否开启,默认关闭。关闭状态可以使用arthas的原生配置
+     */
+    private Boolean arthasOpen = false;
+
+    /**
+     * arthas 服务唯一标识：默认是为空，系统自动生成。
+     * <pre>
+     *     通过 http://localhost:8080/apps.html 可以查看
+     * </pre>
+     */
+    private String arthasAgentId;
+
+    /**
+     * arthas 服务地址
+     */
+    private String arthasTunnelServer;
+
 }

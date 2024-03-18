@@ -53,6 +53,8 @@ public class TraceWalkingCompeteServiceImpl implements TraceWalkingCompeteServic
         compete.setTraceSum((int)traceItems.stream().map(TraceItem::getSpanId).distinct().count());
         compete.setInvokeMethodSum(traceItems.size());
         compete.setTraceTimeConsume((int)(lastTraceItem.getSpanEndMs() - traceItem.getSpanId()));
+        compete.setUserId(lastTraceItem.getUserId());
+        compete.setUserName(lastTraceItem.getUserName());
         compete.setCreatedTime(new Date());
 
         // 数据入库
@@ -68,6 +70,7 @@ public class TraceWalkingCompeteServiceImpl implements TraceWalkingCompeteServic
                 .eq(traceWalkingDto.getExceptionFlag() != null, TraceWalkingCompete::getExceptionFlag, traceWalkingDto.getExceptionFlag())
                 .ge(traceWalkingDto.getInvokeTimeStart() != null, TraceWalkingCompete::getTraceStartTime, traceWalkingDto.getInvokeTimeStart())
                 .le(traceWalkingDto.getInvokeTimeEnd() != null, TraceWalkingCompete::getTraceEndTime, traceWalkingDto.getInvokeTimeEnd())
+                .eq(StringUtils.isNoneBlank(traceWalkingDto.getUserId()), TraceWalkingCompete::getUserId, traceWalkingDto.getUserId())
                 .orderByDesc(TraceWalkingCompete::getTraceStartTime)
                 .last("LIMIT " + Optional.ofNullable(traceWalkingDto.getTopSum()).orElse(10));
         return traceWalkingCompeteMapper.selectList(queryWrapper);

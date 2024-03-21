@@ -22,7 +22,7 @@ public class TraceContextHolder {
 
     private TraceContextHolder() {}
 
-    private static final ThreadLocal<TraceContextLocal> THREAD_LOCAL = new InheritableThreadLocal<>();
+    private static final ThreadLocal<TraceContextLocal> THREAD_LOCAL = new ThreadLocal<>();
 
     /***
      * 线程中增加上下文
@@ -65,7 +65,7 @@ public class TraceContextHolder {
         if (isEmpty()) {
             return false;
         }
-        long count = getTraceItems().stream().filter(item -> item.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX)).count();
+        long count = getTraceItems().stream().filter(item -> item.getMethodName().equals(TraceConstant.EXCEPTION_METHOD_NAME)).count();
         return count > 0;
     }
 

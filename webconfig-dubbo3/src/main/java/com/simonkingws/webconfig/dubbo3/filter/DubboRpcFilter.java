@@ -1,5 +1,6 @@
 package com.simonkingws.webconfig.dubbo3.filter;
 
+import com.simonkingws.webconfig.common.constant.SymbolConstant;
 import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.RequestContextLocal;
 import com.simonkingws.webconfig.common.context.TraceItem;
@@ -39,10 +40,12 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         // 获取本地信息
         RpcServiceContext rpcContext = RpcContext.getServiceContext();
-        String invokeMethodName = String.format(TraceConstant.INVOKE_METHOND_NAME, rpcContext.getUrl().getServiceKey(), rpcContext.getMethodName());
+        String className = rpcContext.getUrl().getServiceKey();
+        String methodName = rpcContext.getMethodName();
+        String currentPos = String.format(TraceConstant.INVOKE_METHOND_NAME, className, methodName);
         if (rpcContext.isConsumerSide()) {
             // 消费端： 同步本地信息（写入dubbo的上下文中）
-            log.info(">>>>>>>消费端：进入DubboRpcFilter，拦截[{}]方法，将本地上下文保存在dubbo中", invokeMethodName);
+            log.info(">>>>>>>消费端：进入DubboRpcFilter，拦截[{}]方法，将本地上下文保存在dubbo中", currentPos);
             RpcContextAttachment clientAttachment = RpcContext.getClientAttachment();
             clientAttachment.setAttachment(RPC_CONTEXT_KEY,  RequestHolder.get());
         }
@@ -52,14 +55,14 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
             Object objectAttachment = serverAttachment.getObjectAttachment(RPC_CONTEXT_KEY);
             if (objectAttachment != null) {
                 RequestContextLocal local = (RequestContextLocal) objectAttachment;
-                log.info(">>>>>>>提供端：进入DubboRpcFilter，拦截[{}]方法被调用，将dubbo上下文的数据保存到本地上下文", invokeMethodName);
+                log.info(">>>>>>>提供端：进入DubboRpcFilter，拦截[{}]方法被调用，将dubbo上下文的数据保存到本地上下文", currentPos);
 
                 Integer traceSum = Optional.ofNullable(local.getTraceSum()).orElse(0);
                 traceSum++;
 
                 local.setTraceSum(traceSum);
-                local.setEndPos(invokeMethodName);
-                local.setRpcMethodName(invokeMethodName);
+                local.setEndPos(currentPos);
+                local.setRpcMethodName(currentPos);
                 local.setSpanId(Instant.now().toEpochMilli());
 
                 // 将处理好的数据放进本地上下文
@@ -71,7 +74,8 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
                     TraceItem traceItem = TraceItem.copy2TraceItem(local);
                     traceItem.setSpanId(Instant.now().toEpochMilli());
                     traceItem.setInvokeStartTime(traceItem.getSpanId());
-                    traceItem.setMethodName(invokeMethodName);
+                    traceItem.setMethodName(methodName + SymbolConstant.BRACKET);
+                    traceItem.setClassName(className);
                     traceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
                     traceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
 
@@ -109,11 +113,15 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
                         // 创建异常链路
                         TraceItem exTraceItem = TraceItem.builder().build();
                         BeanUtils.copyProperties(traceItem, exTraceItem);
-                        traceItem.setInvokeStartTime(Instant.now().toEpochMilli());
-                        exTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + appResponse.getException().getMessage());
+                        long exEpochMilli = Instant.now().toEpochMilli();
+
+                        exTraceItem.setInvokeStartTime(exEpochMilli);
+                        exTraceItem.setMethodName(TraceConstant.EXCEPTION_METHOD_NAME);
+                        exTraceItem.setClassName(TraceConstant.EXCEPTION_CLASS_NAME);
+                        exTraceItem.setExecptionMsg(appResponse.getException().getMessage());
                         exTraceItem.setConsumerApplicatName(serverAttachment.getRemoteApplicationName());
                         exTraceItem.setProviderApplicatName(SpringContextHolder.getApplicationName());
-                        exTraceItem.setInvokeEndTime(Instant.now().toEpochMilli());
+                        exTraceItem.setInvokeEndTime(exEpochMilli);
                         exTraceItem.setSpanEndMs(exTraceItem.getInvokeEndTime());
                         traceItems.add(exTraceItem);
                     }
@@ -131,8 +139,6 @@ public class DubboRpcFilter implements Filter, BaseFilter.Listener {
                 serverAttachment.clearAttachments();
                 // 调用结束之后需要删除本地线程的数据，防止OOM
                 RequestHolder.remove();
-                // 清除链路的线程容器
-                TraceContextHolder.remove();
             }
         }
     }

@@ -53,6 +53,7 @@ public class TraceAspect {
         }
 
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        String className = null;
         String methodName  = null;
         Class<?>[] interfaces = method.getDeclaringClass().getInterfaces();
         if (ArrayUtils.isNotEmpty(interfaces)) {
@@ -61,7 +62,8 @@ public class TraceAspect {
                 if (ArrayUtils.isNotEmpty(methods)) {
                     long count = Arrays.stream(methods).filter(m -> method.getName().equals(m.getName())).count();
                     if (count > 0) {
-                        methodName = anInterface.getName() + SymbolConstant.DOT + method.getName() + SymbolConstant.BRACKET;
+                        className = anInterface.getName();
+                        methodName = method.getName() + SymbolConstant.BRACKET;
                         break;
                     }
                 }
@@ -69,12 +71,14 @@ public class TraceAspect {
         }
         if (StringUtils.isBlank(methodName)) {
             // 本地方法
-            methodName = method.getDeclaringClass().getName() + SymbolConstant.DOT + method.getName() + SymbolConstant.BRACKET;
+            className = method.getDeclaringClass().getName();
+            methodName = method.getName() + SymbolConstant.BRACKET;
         }
-        log.info("@InnerTrace[{}]>>>>>>开始处理>>>>>>>>>>", methodName);
+        String currentPos = String.format(TraceConstant.INVOKE_METHOND_NAME, className, methodName);
+        log.info("@InnerTrace[{}]>>>>>>开始处理>>>>>>>>>>", currentPos);
 
         // 判断该方法是不是Rpc调用的：如果是就忽略，rpc会自己采集
-        if (StringUtils.equals(methodName, local.getRpcMethodName())) {
+        if (StringUtils.equals(currentPos, local.getRpcMethodName())) {
             return joinPoint.proceed();
         }
 
@@ -88,10 +92,10 @@ public class TraceAspect {
                 traceSum += size.intValue();
             }
         }catch (Exception e) {
-            log.warn("方法[{}]中的redis 配置未配置或配置异常：{}", methodName, e.getMessage());
+            log.warn("方法[{}]中的redis 配置未配置或配置异常：{}", currentPos, e.getMessage());
         }
 
-        local.setEndPos(methodName);
+        local.setEndPos(currentPos);
         local.setTraceSum(traceSum);
 
         TraceItem traceItem = TraceItem.copy2TraceItem(local);
@@ -99,6 +103,7 @@ public class TraceAspect {
         traceItem.setConsumerApplicatName(applicationName);
         traceItem.setProviderApplicatName(applicationName);
         traceItem.setMethodName(methodName);
+        traceItem.setClassName(className);
 
         List<TraceItem> traceItemList = TraceContextHolder.getTraceItems();
         Object proceed;
@@ -111,15 +116,19 @@ public class TraceAspect {
         }catch (Throwable th){
             // 有异常需要记录异常的链路信息，并将异常抛出
             try {
-                traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
+                long epochMilli = Instant.now().toEpochMilli();
+                traceItem.setInvokeEndTime(epochMilli);
                 traceItemList.add(traceItem);
 
                 // 增肌异常信息的处理
                 TraceItem exceptionTraceItem = TraceItem.builder().build();
                 BeanUtils.copyProperties(traceItem, exceptionTraceItem);
-                exceptionTraceItem.setInvokeStartTime(Instant.now().toEpochMilli());
-                exceptionTraceItem.setMethodName(TraceConstant.EXCEPTION_TRACE_PREFIX + th.getMessage());
-                traceItem.setInvokeEndTime(Instant.now().toEpochMilli());
+
+                exceptionTraceItem.setInvokeStartTime(epochMilli);
+                exceptionTraceItem.setClassName(TraceConstant.EXCEPTION_CLASS_NAME);
+                exceptionTraceItem.setMethodName(TraceConstant.EXCEPTION_METHOD_NAME);
+                exceptionTraceItem.setExecptionMsg(th.getMessage());
+                traceItem.setInvokeEndTime(epochMilli);
                 traceItemList.add(exceptionTraceItem);
             }catch (Exception e){
                 log.warn("处理@InnerTrace注解异常：", e);

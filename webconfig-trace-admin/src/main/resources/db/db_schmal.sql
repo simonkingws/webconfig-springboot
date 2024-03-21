@@ -19,6 +19,7 @@ USE webconfig_trace;
 CREATE TABLE IF NOT EXISTS `trace_walking_compete` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `trace_id` varchar(50) NOT NULL COMMENT '链路的唯一标识',
+  `request_url` varchar(200) DEFAULT NULL COMMENT '链路方法的请求入口的URL',
   `trace_start_time` datetime(3) DEFAULT NULL COMMENT '链路开始的时间',
   `trace_end_time` datetime(3) DEFAULT NULL COMMENT '链路的结束时间',
   `trace_time_consume` int(11) DEFAULT '0' COMMENT '链路的耗时（单位：毫秒）',
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `trace_walking_compete` (
   `trace_sum` int(11) DEFAULT '0' COMMENT '链路数',
   `invoke_method_sum` int(11) DEFAULT '0' COMMENT '调用的方法数（包含异常方法）',
   `exception_flag` tinyint(1) DEFAULT '0' COMMENT '是否有异常（0：否 1：是）',
+  `exception_msg` varchar(500) DEFAULT NULL COMMENT '异常信息',
   `user_id` varchar(50) DEFAULT 'anonymous' COMMENT '调用链路的用户ID',
   `user_name` varchar(50) DEFAULT 'anonymous' COMMENT '调用链路的用户姓名',
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -56,12 +58,17 @@ CREATE TABLE IF NOT EXISTS `trace_walking_method` (
   `method_time_consume` int(11) DEFAULT '0' COMMENT '方法调用的耗时（单位：毫秒）',
   `consumer_server_name` varchar(100) DEFAULT NULL COMMENT '方法所在消费端服务的名称',
   `provider_server_name` varchar(100) DEFAULT NULL COMMENT '方法所在调用端服务的名称',
-  `method_name` varchar(500) DEFAULT NULL COMMENT '方法名',
+  `request_url` varchar(200) DEFAULT NULL COMMENT '链路方法的请求入口的URL',
+  `class_name` varchar(200) DEFAULT NULL COMMENT '方法所在的类',
+  `method_name` varchar(150) DEFAULT NULL COMMENT '方法名',
+  `exception_flag` tinyint(1) DEFAULT '0' COMMENT '是否异常方法（0：否 1：是）',
+  `exception_msg` varchar(500) DEFAULT NULL COMMENT '异常信息',
   `invoke_order` int(11) DEFAULT '0' COMMENT '方法执行的顺序号',
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_trace_id` (`trace_id`) USING BTREE,
-  KEY `idx_span_id` (`span_id`) USING BTREE
+  KEY `idx_method_name` (`method_name`) USING BTREE,
+  KEY `idx_method_start_time` (`method_start_time`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='链路方法信息';
 
 -- ----------------------------

@@ -98,6 +98,10 @@ public class RequestContextLocal implements Serializable {
     /** 远程调用的方法名： 次参数传输不传递 */
     private String rpcMethodName;
 
+    /** 请求的入口Url： 次参数传输不传递 */
+    private String requestUrl;
+
+
     /**
      * 从请求头中构建上线下文参数
      *
@@ -107,15 +111,13 @@ public class RequestContextLocal implements Serializable {
     public static RequestContextLocal buildContext(HttpServletRequest request){
         String traceId = request.getHeader(RequestHeaderConstant.TRACE_ID);
         String traceSum = request.getHeader(RequestHeaderConstant.TRACE_SUM);
-        String startPos = request.getHeader(RequestHeaderConstant.START_POS);
         String traceStartMs = request.getHeader(RequestHeaderConstant.TRACE_START_MS);
 
         RequestContextLocalBuilder builder = RequestContextLocal.builder()
                 .traceId(StringUtils.isNotBlank(traceId) ? traceId : UUID.randomUUID().toString())
                 .spanId(Instant.now().toEpochMilli())
                 .traceSum(StringUtils.isNotBlank(traceSum) ? Integer.parseInt(traceSum) : 0)
-                .startPos(StringUtils.isNotBlank(startPos) ? startPos : request.getRequestURL().toString())
-                .endPos(request.getRequestURI())
+                .startPos(request.getHeader(RequestHeaderConstant.START_POS))
                 .traceStartMs(StringUtils.isNotBlank(traceStartMs) ? Long.parseLong(traceStartMs) : Instant.now().toEpochMilli())
                 .userId(request.getHeader(RequestHeaderConstant.USER_ID))
                 .userName(request.getHeader(RequestHeaderConstant.USER_NAME))

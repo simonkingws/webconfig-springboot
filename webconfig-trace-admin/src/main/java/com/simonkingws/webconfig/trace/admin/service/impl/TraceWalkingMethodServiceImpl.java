@@ -2,12 +2,17 @@ package com.simonkingws.webconfig.trace.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.TraceItem;
+import com.simonkingws.webconfig.trace.admin.constant.SqlFieldConstant;
+import com.simonkingws.webconfig.trace.admin.dto.MethodInvokeDTO;
 import com.simonkingws.webconfig.trace.admin.mapper.TraceWalkingMethodMapper;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingMethodService;
+import com.simonkingws.webconfig.trace.admin.vo.MethodStatVO;
 import com.simonkingws.webconfig.trace.admin.vo.ServerInvokeVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +47,15 @@ public class TraceWalkingMethodServiceImpl implements TraceWalkingMethodService 
             method.setSpanTimeConsume((int)(item.getSpanEndMs() - item.getSpanId()));
             method.setConsumerServerName(item.getConsumerApplicatName());
             method.setProviderServerName(item.getProviderApplicatName());
+            method.setRequestUrl(item.getRequestUrl());
             method.setMethodName(item.getMethodName());
+            method.setClassName(item.getClassName());
+            method.setExceptionFlag(StringUtils.equals(item.getMethodName(), TraceConstant.EXCEPTION_METHOD_NAME));
+            String execptionMsg = item.getExecptionMsg();
+            if (StringUtils.isNotEmpty(execptionMsg) && execptionMsg.length() > SqlFieldConstant.EXCEPTION_MSG_LENGTH) {
+                execptionMsg = execptionMsg.substring(0, SqlFieldConstant.EXCEPTION_MSG_LENGTH);
+            }
+            method.setExceptionMsg(execptionMsg);
             method.setMethodStartTime(new Date(item.getInvokeStartTime()));
             method.setMethodEndTime(new Date(item.getInvokeEndTime()));
             method.setMethodTimeConsume((int)(item.getInvokeEndTime() - item.getInvokeStartTime()));
@@ -68,5 +81,13 @@ public class TraceWalkingMethodServiceImpl implements TraceWalkingMethodService 
                 .eq(TraceWalkingMethod::getTraceId, traceId)
                 .orderByDesc(TraceWalkingMethod::getInvokeOrder);
         return traceWalkingMethodMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public List<MethodStatVO> getMethodInvokeStat(MethodInvokeDTO methodInvokeDto) {
+        if (methodInvokeDto.getTopSum() == null) {
+            methodInvokeDto.setTopSum(5);
+        }
+        return traceWalkingMethodMapper.getMethodInvokeStat(methodInvokeDto);
     }
 }

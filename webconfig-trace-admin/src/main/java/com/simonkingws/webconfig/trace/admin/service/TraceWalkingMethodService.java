@@ -1,7 +1,9 @@
 package com.simonkingws.webconfig.trace.admin.service;
 
 import com.simonkingws.webconfig.common.context.TraceItem;
+import com.simonkingws.webconfig.trace.admin.dto.MethodInvokeDTO;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
+import com.simonkingws.webconfig.trace.admin.vo.MethodStatVO;
 import com.simonkingws.webconfig.trace.admin.vo.ServerInvokeVO;
 
 import java.util.List;
@@ -21,4 +23,6 @@ public interface TraceWalkingMethodService {
     List<ServerInvokeVO> statServerInvokeCount();
 
     List<TraceWalkingMethod> getMethodTraceList(String traceId);
+
+    List<MethodStatVO> getMethodInvokeStat(MethodInvokeDTO methodInvokeDto);
 }

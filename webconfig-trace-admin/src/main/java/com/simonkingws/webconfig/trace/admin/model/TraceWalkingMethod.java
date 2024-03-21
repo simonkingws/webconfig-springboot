@@ -15,15 +15,15 @@ import java.util.Date;
  * </p>
  *
  * @author ws
- * @since 2024-03-05
+ * @since 2024-03-21
  */
 @Getter
 @Setter
 @TableName("trace_walking_method")
 public class TraceWalkingMethod implements Serializable {
 
+    private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 2833988135853660712L;
     /**
      * 主键
      */
@@ -81,9 +81,29 @@ public class TraceWalkingMethod implements Serializable {
     private String providerServerName;
 
     /**
+     * 方法请求的入口Url
+     */
+    private String requestUrl;
+
+    /**
+     * 方法所在的类
+     */
+    private String className;
+
+    /**
      * 方法名
      */
     private String methodName;
+
+    /**
+     * 是否异常方法（0：否 1：是）
+     */
+    private Boolean exceptionFlag;
+
+    /**
+     * 异常信息
+     */
+    private String exceptionMsg;
 
     /**
      * 方法执行的顺序号

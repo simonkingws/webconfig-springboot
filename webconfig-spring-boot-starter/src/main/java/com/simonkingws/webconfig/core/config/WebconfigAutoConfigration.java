@@ -83,11 +83,25 @@ public class WebconfigAutoConfigration implements WebMvcConfigurer {
     @PostConstruct
     public void initArthasAgent() {
         if (BooleanUtils.isTrue(webconfigProperies.getArthasOpen())) {
+            if (BooleanUtils.isTrue(webconfigProperies.getArthasIsSelfConfig())) {
+                return;
+            }
+
             Map<String, String> configMap = new HashMap<>();
+            configMap.put("arthas.arthasIp", webconfigProperies.getArthasIp());
             configMap.put("arthas.agentId", webconfigProperies.getArthasAgentId());
             configMap.put("arthas.appName", applicationName);
             configMap.put("arthas.tunnelServer", webconfigProperies.getArthasTunnelServer());
             ArthasAgent.attach(configMap);
+
+            return;
         }
+
+        // 关闭arthas
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put("arthas.telnetPort", "-1");
+        configMap.put("arthas.httpPort", "-1");
+        configMap.put("arthas.appName", applicationName);
+        ArthasAgent.attach(configMap);
     }
 }

@@ -13,7 +13,8 @@ public interface TraceConstant {
     /** 链路追踪的名称: [序号][消费端服务名称][提供端服务名称][方法名称] */
     String INVOKE_TRACE = "([%d][%s][%s][%s])";
 
-    String EXCEPTION_TRACE_PREFIX = "java.lang.Throwable" + SymbolConstant.COLON + SymbolConstant.SPACE;
+    String EXCEPTION_CLASS_NAME = "java.lang.Throwable";
+    String EXCEPTION_METHOD_NAME = "try-catch()";
 
     String COLLECT_PATH = "%s://%s/trace/collect";
 

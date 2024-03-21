@@ -49,7 +49,8 @@ public class MPPGeneratorTest {
                 })
                 .strategyConfig(builder -> {
                     builder.addInclude("trace_walking_compete", "trace_walking_method", "trace_walking_server", "trace_walking_user")
-                    .entityBuilder().enableLombok().enableFileOverride().enableRemoveIsPrefix().enableTableFieldAnnotation().enableTableFieldAnnotation()
+                    //.entityBuilder().enableLombok().enableFileOverride().enableRemoveIsPrefix().enableTableFieldAnnotation().enableTableFieldAnnotation()
+                    .entityBuilder().enableLombok().enableFileOverride().enableRemoveIsPrefix()
                     .serviceBuilder().enableFileOverride().formatServiceFileName("%sService")
                     .mapperBuilder().enableFileOverride()
                     .controllerBuilder().enableFileOverride();

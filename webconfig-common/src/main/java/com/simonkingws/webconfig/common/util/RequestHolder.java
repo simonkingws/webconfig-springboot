@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class RequestHolder {
 
     private RequestHolder() {}
 
-    private static final ThreadLocal<RequestContextLocal> THREAD_LOCAL = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestContextLocal> THREAD_LOCAL = new ThreadLocal<>();
 
     public static void add(RequestContextLocal requestContextLocal) {
         THREAD_LOCAL.set(requestContextLocal);
@@ -56,17 +57,18 @@ public class RequestHolder {
     public static void remove() {
         THREAD_LOCAL.remove();
         MDC.clear();
+        TraceContextHolder.remove();
     }
 
     public static void remove(RequestContextLocalPostProcess requestContextLocalPostProcess) {
-        log.info("当前请求的本地副本被清除.");
+        log.debug("当前请求的本地副本被清除.");
         RequestContextLocal local = THREAD_LOCAL.get();
         try {
             if (local != null) {
                 local.setTraceEndMs(Instant.now().toEpochMilli());
 
                 // 异步处理链路数据
-                asyncHandleTrace(local, requestContextLocalPostProcess);
+                asyncHandleTrace(local, requestContextLocalPostProcess, TraceContextHolder.getTraceItems());
             }
         }finally {
             remove();
@@ -79,8 +81,9 @@ public class RequestHolder {
      * @author ws
      * @date 2024/2/26 18:59
      */
-    private static void asyncHandleTrace(RequestContextLocal local, RequestContextLocalPostProcess requestContextLocalPostProcess) {
+    private static void asyncHandleTrace(RequestContextLocal local, RequestContextLocalPostProcess requestContextLocalPostProcess, List<TraceItem> traceItems) {
         CompletableFuture.runAsync(() -> {
+            // 线程池的中的线程变量是共享的，所以需要特殊处理，方式多线程队共享资源的变更
             String traceId = local.getTraceId();
             try {
                 Boolean openTraceCollect = local.getOpenTraceCollect();
@@ -90,23 +93,25 @@ public class RequestHolder {
                         MDC.put(MDCKey.TRACEID, traceId);
 
                         // 获取整条链路采集的链路数据
-                        List<TraceItem> traceItemList = filterEnableTraceItemList(local);
+                        List<TraceItem> traceItemList = filterEnableTraceItemList(local, traceItems);
 
                         // 清除缓存的的链路数据
                         stringRedisTemplate.delete(traceId);
 
-                        // 输出链路信息
-                        String traceWalking = getCompeleteTraceWalking(traceItemList);
-                        log.info("当前请求的完整的链路信息：{}", traceWalking);
+                        if (!CollectionUtils.isEmpty(traceItemList)) {
+                            // 输出链路信息
+                            String traceWalking = getCompeleteTraceWalking(traceItemList);
+                            log.info("当前请求的完整的链路信息：{}", traceWalking);
 
-                        local.setTraceSum(traceItemList.size());
-                        local.setTraceWalking(traceWalking);
-                        local.setEndPos(traceItemList.get(traceItemList.size() - 1).getMethodName());
+                            local.setTraceSum(traceItemList.size());
+                            local.setTraceWalking(traceWalking);
+                            local.setEndPos(traceItemList.get(traceItemList.size() - 1).getMethodName());
 
-                        // 推送数据
-                        pushCollectData2Server(traceItemList);
+                            // 推送数据
+                            pushCollectData2Server(traceItemList);
+
+                        }
                     }
-
                 }
 
                 // 调用销毁的方法
@@ -115,31 +120,17 @@ public class RequestHolder {
                 }
             }catch (Exception e){
                 log.info("处理采集的链路数据异常：", e);
-            }finally {
-                // 清除MDC
-                MDC.clear();
-                // 清除子线程链路线程中的数据
-                TraceContextHolder.remove();
             }
         });
     }
 
-    private static List<TraceItem> filterEnableTraceItemList(RequestContextLocal local) {
-        String applicationName = SpringContextHolder.getApplicationName();
-        // 构建初始化的方法
-        TraceItem traceBegin = TraceItem.copy2TraceItem(local);
-        traceBegin.setOrder(0);
-        traceBegin.setInvokeStartTime(traceBegin.getSpanId());
-        traceBegin.setMethodName(local.getStartPos());
-        traceBegin.setConsumerApplicatName(applicationName);
-        traceBegin.setProviderApplicatName(applicationName);
-        traceBegin.setInvokeEndTime(local.getTraceEndMs());
-        traceBegin.setSpanEndMs(local.getTraceEndMs());
-
-        List<TraceItem> traceItemList = new LinkedList<>();
-        traceItemList.add(traceBegin);
-        if (TraceContextHolder.isNotEmpty()) {
-            traceItemList.addAll(TraceContextHolder.getTraceItems());
+    private static List<TraceItem> filterEnableTraceItemList(RequestContextLocal local, List<TraceItem> traceItems) {
+        List<TraceItem> traceItemList = new LinkedList<>(traceItems);
+        if (!CollectionUtils.isEmpty(traceItemList)) {
+            // 补充开始的方法的结束时间
+            TraceItem traceBegin = traceItemList.get(0);
+            traceBegin.setInvokeEndTime(local.getTraceEndMs());
+            traceBegin.setSpanEndMs(local.getTraceEndMs());
         }
 
         // 处理缓存数据
@@ -148,10 +139,13 @@ public class RequestHolder {
             List<TraceItem> collect = traces.stream().map(traceItem -> JSON.parseObject(traceItem, TraceItem.class)).collect(Collectors.toList());
             traceItemList.addAll(collect);
         }
+        if (CollectionUtils.isEmpty(traceItemList)) {
+            return Collections.emptyList();
+        }
 
         // 分离异常链路，只保存最早的一条
-        List<TraceItem> nomalList = traceItemList.stream().filter(item -> !item.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX)).collect(Collectors.toList());
-        List<TraceItem> exceptionList = traceItemList.stream().filter(item -> item.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX)).collect(Collectors.toList());
+        List<TraceItem> nomalList = traceItemList.stream().filter(item -> !item.getMethodName().equals(TraceConstant.EXCEPTION_METHOD_NAME)).collect(Collectors.toList());
+        List<TraceItem> exceptionList = traceItemList.stream().filter(item -> item.getMethodName().equals(TraceConstant.EXCEPTION_METHOD_NAME)).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(exceptionList)) {
             if (exceptionList.size() > 1) {
                 exceptionList.sort(Comparator.comparing(TraceItem::getOrder));
@@ -168,6 +162,7 @@ public class RequestHolder {
 
         // 补充用户信息
         nomalList.forEach(item -> {
+            item.setRequestUrl(local.getRequestUrl());
             item.setUserId(local.getUserId());
             item.setUserName(local.getUserName());
         });
@@ -199,7 +194,8 @@ public class RequestHolder {
     private static String getCompeleteTraceWalking(List<TraceItem> traceItemList) {
         StringBuilder sb = new StringBuilder();
         traceItemList.forEach(item -> {
-            String trace = String.format(TraceConstant.INVOKE_TRACE, item.getOrder(), item.getConsumerApplicatName(), item.getProviderApplicatName(), item.getMethodName());
+            String methodName = item.getClassName() + SymbolConstant.DOT + item.getMethodName();
+            String trace = String.format(TraceConstant.INVOKE_TRACE, item.getOrder(), item.getConsumerApplicatName(), item.getProviderApplicatName(), methodName);
             sb.append(trace).append(SymbolConstant.ARROW);
         });
 

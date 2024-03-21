@@ -8,4 +8,28 @@
         FROM trace_walking_method m
         GROUP BY m.provider_server_name
     </select>
+
+    <select id="getMethodInvokeStat" resultType="com.simonkingws.webconfig.trace.admin.vo.MethodStatVO">
+        SELECT
+            m.class_name as className,
+            m.method_name as methodName,
+            COUNT(*) as invokeCount
+        FROM trace_walking_method m
+        WHERE m.exception_flag = 0
+        <if test="invokeTimeStart != null">
+            <![CDATA[ AND m.method_start_time >= #{invokeTimeStart}]]>
+        </if>
+        <if test="invokeTimeEnd != null">
+            <![CDATA[ AND m.method_start_time <= #{invokeTimeEnd}]]>
+        </if>
+        <if test="methodName != null and methodName != ''">
+            AND m.method_name = #{methodName}
+        </if>
+        GROUP BY m.method_name, m.class_name
+        ORDER BY invokeCount
+        <if test="activation != null and activation='HIGH'">
+            ASC
+        </if>
+        LIMIT #{topSum}
+    </select>
 </mapper>

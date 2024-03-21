@@ -2,11 +2,14 @@ package com.simonkingws.webconfig.trace.admin.controller;
 
 import com.simonkingws.webconfig.common.core.JsonResult;
 import com.simonkingws.webconfig.trace.admin.constant.LoginConstant;
+import com.simonkingws.webconfig.trace.admin.dto.MethodInvokeDTO;
 import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingUser;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingCompeteService;
+import com.simonkingws.webconfig.trace.admin.service.TraceWalkingMethodService;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingUserService;
+import com.simonkingws.webconfig.trace.admin.vo.MethodStatVO;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,8 @@ public class LoginController {
     @Autowired
     private TraceWalkingCompeteService traceWalkingCompeteService;
     @Autowired
+    private TraceWalkingMethodService traceWalkingMethodService;
+    @Autowired
     private AnalyzeController analyzeController;
 
     /**
@@ -67,6 +72,10 @@ public class LoginController {
         // 加载topx的数据
         List<TraceWalkingCompete> competeList = traceWalkingCompeteService.getCompeteByCondition(TraceWalkingDTO.empty());
         model.addAttribute("walkingCompeteList", competeList);
+
+        // 加载方法的调用统计
+        List<MethodStatVO> methodStatList = traceWalkingMethodService.getMethodInvokeStat(MethodInvokeDTO.empty());
+        model.addAttribute("methodStatList", methodStatList);
         return "index";
     }
 

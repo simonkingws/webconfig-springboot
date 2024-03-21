@@ -69,6 +69,7 @@ public interface RequestHeaderConstant {
     String FIEGN_MARK_KEY = "fiegn-request-mark";
     Collection<String> FIEGN_MARK_VAL = Collections.singletonList("fiegn-request");
     String FIEGN_METHOD_NAME = "fiegn-method-name";
+    String FIEGN_CLASS_NAME = "fiegn-class-name";
     String FIEGN_CONSUMER_APPLICATION_NAME = "fiegn-consumer-application-name";
 
     /**

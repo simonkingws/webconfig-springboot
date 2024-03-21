@@ -2,8 +2,10 @@ package com.simonkingws.webconfig.trace.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.simonkingws.webconfig.common.constant.SymbolConstant;
 import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.TraceItem;
+import com.simonkingws.webconfig.trace.admin.constant.SqlFieldConstant;
 import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
 import com.simonkingws.webconfig.trace.admin.mapper.TraceWalkingCompeteMapper;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
@@ -41,17 +43,33 @@ public class TraceWalkingCompeteServiceImpl implements TraceWalkingCompeteServic
         compete.setTraceId(traceItem.getTraceId());
         compete.setTraceStartTime(new Date(traceItem.getSpanId()));
         compete.setApplicationName(traceItem.getConsumerApplicatName());
-        compete.setTraceStartPos(traceItem.getMethodName());
+        compete.setTraceStartPos(traceItem.getClassName() + SymbolConstant.DOT + traceItem.getMethodName());
+        compete.setRequestUrl(traceItem.getRequestUrl());
 
         // 解析链路的出口数据
-        TraceItem lastTraceItem = traceItems.get(traceItems.size() -1);
+        int size = traceItems.size();
+        TraceItem lastTraceItem = traceItems.get(size -1);
+        compete.setExceptionFlag(StringUtils.equals(lastTraceItem.getMethodName(), TraceConstant.EXCEPTION_METHOD_NAME));
         compete.setTraceEndTime(new Date(lastTraceItem.getSpanEndMs()));
-        compete.setTraceEndPos(lastTraceItem.getMethodName());
-        compete.setExceptionFlag(lastTraceItem.getMethodName().startsWith(TraceConstant.EXCEPTION_TRACE_PREFIX));
+
+        String endPos = lastTraceItem.getMethodName();
+        if (compete.getExceptionFlag()) {
+            String execptionMsg = lastTraceItem.getExecptionMsg();
+            if (StringUtils.isNotEmpty(execptionMsg) && execptionMsg.length() > SqlFieldConstant.EXCEPTION_MSG_LENGTH) {
+                execptionMsg = execptionMsg.substring(0, SqlFieldConstant.EXCEPTION_MSG_LENGTH);
+            }
+            compete.setExceptionMsg(execptionMsg);
+            if (size > 1) {
+                // 如果有异常取前一个节点
+                TraceItem ti = traceItems.get(size - 2);
+                endPos = ti.getMethodName();
+            }
+        }
+        compete.setTraceEndPos(endPos);
 
         // 解析汇总数据
         compete.setTraceSum((int)traceItems.stream().map(TraceItem::getSpanId).distinct().count());
-        compete.setInvokeMethodSum(traceItems.size());
+        compete.setInvokeMethodSum(size);
         compete.setTraceTimeConsume((int)(lastTraceItem.getSpanEndMs() - traceItem.getSpanId()));
         compete.setUserId(lastTraceItem.getUserId());
         compete.setUserName(lastTraceItem.getUserName());

@@ -1,7 +1,9 @@
 package com.simonkingws.webconfig.trace.admin.mapper;
 
+import com.simonkingws.webconfig.trace.admin.dto.MethodInvokeDTO;
 import com.simonkingws.webconfig.trace.admin.mapper.generate.GenerateMapper;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingMethod;
+import com.simonkingws.webconfig.trace.admin.vo.MethodStatVO;
 import com.simonkingws.webconfig.trace.admin.vo.ServerInvokeVO;
 
 import java.util.List;
@@ -17,4 +19,6 @@ import java.util.List;
 public interface TraceWalkingMethodMapper extends GenerateMapper<TraceWalkingMethod> {
 
     List<ServerInvokeVO> statServerInvokeCount();
+
+    List<MethodStatVO> getMethodInvokeStat(MethodInvokeDTO methodInvokeDto);
 }

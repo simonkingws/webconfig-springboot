@@ -1,6 +1,7 @@
 package com.simonkingws.webconfig.feign.interceptor;
 
 import com.simonkingws.webconfig.common.constant.RequestHeaderConstant;
+import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.RequestContextLocal;
 import com.simonkingws.webconfig.common.core.WebconfigProperies;
 import com.simonkingws.webconfig.common.util.RequestHolder;
@@ -39,13 +40,16 @@ public class FeignRequestInterceptor implements RequestInterceptor {
             if (requestContextLocal != null) {
                 // 获取调用的方法
                 MethodMetadata methodMetadata = requestTemplate.methodMetadata();
-                String invokeMethodName = methodMetadata.targetType().getName() + "." + methodMetadata.method().getName() + "()";
+                String className = methodMetadata.targetType().getName();
+                String methodName = methodMetadata.method().getName();
+                String currentPos = String.format(TraceConstant.INVOKE_METHOND_NAME, className, methodName);
                 String applicationName = SpringContextHolder.getApplicationName();
 
                 // 增加链路信息
                 Map<String, Collection<String>> collectionMap = requestContextLocal.context2HeaderMap();
                 collectionMap.put(RequestHeaderConstant.FIEGN_MARK_KEY, RequestHeaderConstant.FIEGN_MARK_VAL);
-                collectionMap.put(RequestHeaderConstant.FIEGN_METHOD_NAME, Collections.singletonList(invokeMethodName));
+                collectionMap.put(RequestHeaderConstant.FIEGN_METHOD_NAME, Collections.singletonList(methodName));
+                collectionMap.put(RequestHeaderConstant.FIEGN_CLASS_NAME, Collections.singletonList(className));
                 collectionMap.put(RequestHeaderConstant.FIEGN_CONSUMER_APPLICATION_NAME, Collections.singletonList(applicationName));
 
                 Integer traceSum = Optional.ofNullable(requestContextLocal.getTraceSum()).orElse(0);
@@ -53,7 +57,7 @@ public class FeignRequestInterceptor implements RequestInterceptor {
 
                 // 更新动态Header信息
                 collectionMap.put(RequestHeaderConstant.TRACE_SUM, Collections.singletonList(String.valueOf(traceSum)));
-                collectionMap.put(RequestHeaderConstant.END_POS, Collections.singletonList(invokeMethodName));
+                collectionMap.put(RequestHeaderConstant.END_POS, Collections.singletonList(currentPos));
                 collectionMap.put(RequestHeaderConstant.SPAN_ID, Collections.singletonList(String.valueOf(Instant.now().toEpochMilli())));
 
                 requestTemplate.headers(collectionMap);

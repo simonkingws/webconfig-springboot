@@ -54,4 +54,7 @@ public interface SymbolConstant {
     /** 括号 */
     String BRACKET = "()";
 
+    /** 井号 */
+    String HASH = "#";
+
 }

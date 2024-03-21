@@ -28,9 +28,4 @@ public class TraceContextLocal implements Serializable {
     public static TraceContextLocal ofInstance() {
         return new TraceContextLocal();
     }
-
-    public TraceContextLocal addItem(TraceItem traceItem) {
-        this.traceItems.add(traceItem);
-        return this;
-    }
 }

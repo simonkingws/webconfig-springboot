@@ -54,9 +54,24 @@ public class TraceItem implements Serializable {
     private String providerApplicatName;
 
     /**
+     *  调用的方法的入口Url
+     */
+    private String requestUrl;
+
+    /**
      *  调用的方法
      */
     private String methodName;
+
+    /**
+     *  调用的方法的类型
+     */
+    private String className;
+
+    /**
+     *  调用的方法的类型
+     */
+    private String execptionMsg;
 
     /**
      *  调用的顺序

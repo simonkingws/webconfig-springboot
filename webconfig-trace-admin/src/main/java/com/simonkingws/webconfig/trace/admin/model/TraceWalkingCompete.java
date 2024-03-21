@@ -36,6 +36,11 @@ public class TraceWalkingCompete implements Serializable {
     private String traceId;
 
     /**
+     * 方法请求的入口Url
+     */
+    private String requestUrl;
+
+    /**
      * 链路开始的时间
      */
     private Date traceStartTime;
@@ -79,6 +84,11 @@ public class TraceWalkingCompete implements Serializable {
      * 是否有异常（0：否 1：是）
      */
     private Boolean exceptionFlag;
+
+    /**
+     * 异常信息
+     */
+    private String exceptionMsg;
 
     /**
      * 调用链路的用户ID

@@ -1,8 +1,12 @@
 package com.simonkingws.webconfig.trace.admin.controller;
 
+import com.alibaba.fastjson2.JSON;
+import com.simonkingws.webconfig.trace.admin.dto.MethodInvokeDTO;
 import com.simonkingws.webconfig.trace.admin.dto.TraceWalkingDTO;
 import com.simonkingws.webconfig.trace.admin.model.TraceWalkingCompete;
 import com.simonkingws.webconfig.trace.admin.service.TraceWalkingCompeteService;
+import com.simonkingws.webconfig.trace.admin.service.TraceWalkingMethodService;
+import com.simonkingws.webconfig.trace.admin.vo.MethodStatVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +29,8 @@ public class AnalyzePageController {
 
     @Autowired
     private TraceWalkingCompeteService traceWalkingCompeteService;
+    @Autowired
+    private TraceWalkingMethodService traceWalkingMethodService;
 
 
     /**
@@ -38,5 +44,19 @@ public class AnalyzePageController {
         List<TraceWalkingCompete> competeList = traceWalkingCompeteService.getCompeteByCondition(traceWalkingDto);
         model.addAttribute("walkingCompeteList", competeList);
         return "index::walkingCompeteList";
+    }
+
+    /**
+     * 根据条件获取调用方法的统计
+     *
+     * @author ws
+     * @date 2024/3/14 13:17
+     */
+    @GetMapping("/loadMethodStat")
+    public String loadMethodStat(MethodInvokeDTO methodInvokeDto, Model model) {
+        List<MethodStatVO> methodStatList = traceWalkingMethodService.getMethodInvokeStat(methodInvokeDto);
+        model.addAttribute("methodStatList", methodStatList);
+        model.addAttribute("methodStatListJson", JSON.toJSONString(methodStatList));
+        return "index::methdStatList";
     }
 }

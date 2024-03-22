@@ -7,127 +7,260 @@
     <link rel="stylesheet" th:href="@{/css/index.css}" th:inline="css">
 </head>
 <body>
-    <div class="content-bottom content-title">trace-walking全链路统计信息</div>
-    <div class="content-bottom">
-        <p><span>服务调用的统计</span></p>
-        <ul class="title-ul">
-            <li class="li-default" data-type="list">列表</li>
-            <li data-type="histogram">柱状图</li>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo layui-hide-xs layui-bg-black">全链路统计信息</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item layui-hide layui-show-sm-inline-block">
+                <a href="javascript:;">
+                    <img src="//unpkg.com/outeres@0.0.10/img/layui/icon-v2.png" class="layui-nav-img">
+                    tester
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="javascript:void(0);">注销</a></dd>
+                    <dd><a href="javascript:void(0);">登出</a></dd>
+                </dl>
+            </li>
         </ul>
-        <div class="data-list">
-            <table class="layui-table little-table">
-                <thead>
-                    <tr>
-                        <th>服务名称</th>
-                        <th>调用的次数</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="serviceStat: ${serverHistogram}">
-                        <td th:text="${serviceStat.serverName}" ></td>
-                        <td th:text="${serviceStat.invokeCount}"></td>
-                    </tr>
-                </tbody>
-            </table>
+    </div>
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree">
+                <li class="layui-nav-item layui-nav-itemed layui-this">
+                    <a href="#server-stat">服务调用的统计</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="#server-graph">服务调用的拓扑图</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="#server-trace">服务调用的链路</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="#method-active">方法调用的活跃程度</a>
+                </li>
+            </ul>
         </div>
-        <div id="chart-container"></div>
     </div>
-    <div class="content-bottom">
-        <p><span>服务调用的拓扑图</span></p>
-        <div id="graph-container"></div>
-    </div>
-    <div class="content-bottom">
-        <p><span>服务调用的链路</span></p>
-        <form class="layui-form">
-            <div class="layui-form-item">
-                <div class="layui-inline">
-                    <label class="layui-form-label">展示的链路数：</label>
-                    <div class="layui-input-inline">
-                        <select name="topSum">
-                            <option value="10" selected>10条</option>
-                            <option value="30">30条</option>
-                            <option value="50">50条</option>
-                            <option value="100">100条</option>
-                            <option value="200">200条</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="layui-inline">
-                    <label class="layui-form-label">traceId：</label>
-                    <div class="layui-input-inline width-300">
-                        <input type="text" name="traceId" autocomplete="off" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-inline">
-                    <label class="layui-form-label">链路调用的用户ID：</label>
-                    <div class="layui-input-inline">
-                        <input type="text" name="userId" autocomplete="off" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-inline">
-                    <label class="layui-form-label">是否有异常链路：</label>
-                    <div class="layui-input-block">
-                        <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="是" value="true">
-                        <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="否" value="false">
-                    </div>
-                </div>
-                <div class="layui-inline">
-                    <label class="layui-form-label">链路调用的日期：</label>
-                    <div class="layui-input-inline layui-input-wrap">
-                        <div class="layui-input-prefix">
-                            <i class="layui-icon layui-icon-date"></i>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-div-padding">
+            <div class="layui-card layui-panel">
+                <div class="layui-card-body">
+                    <div class="content-bottom" id="server-stat">
+                        <p class="title-p"><span>服务调用的统计</span></p>
+                        <ul class="title-ul">
+                            <li class="li-default" data-type="list">列表</li>
+                            <li data-type="histogram">柱状图</li>
+                        </ul>
+                        <div class="server-data-list">
+                            <table class="layui-table little-table">
+                                <thead>
+                                <tr>
+                                    <th>服务名称</th>
+                                    <th>调用的次数</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="serviceStat: ${serverHistogram}">
+                                    <td th:text="${serviceStat.serverName}" ></td>
+                                    <td th:text="${serviceStat.invokeCount}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <input type="text" name="invokeTimeStart" id="invokeTimeStart" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                        <div id="chart-container"></div>
                     </div>
-                    <div class="layui-input-inline layui-input-wrap">
-                        <div class="layui-input-prefix">
-                            <i class="layui-icon layui-icon-date"></i>
+                </div>
+
+                <div class="content-bottom" id="server-graph">
+                    <p><span>服务调用的拓扑图</span></p>
+                    <div id="graph-container"></div>
+                </div>
+
+                <div class="content-bottom" id="server-trace">
+                    <p><span>服务调用的链路</span></p>
+                    <form class="layui-form trace-form">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">展示的链路数：</label>
+                                <div class="layui-input-inline">
+                                    <select name="topSum">
+                                        <option value="10" selected>10条</option>
+                                        <option value="30">30条</option>
+                                        <option value="50">50条</option>
+                                        <option value="100">100条</option>
+                                        <option value="200">200条</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">traceId：</label>
+                                <div class="layui-input-inline width-300">
+                                    <input type="text" name="traceId" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">链路调用的用户ID：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="userId" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">是否有异常链路：</label>
+                                <div class="layui-input-block">
+                                    <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="是" value="true">
+                                    <input type="checkbox" name="exceptionFlag" lay-skin="tag" title="否" value="false">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <label class="layui-form-label">链路调用的日期：</label>
+                                <div class="layui-input-inline layui-input-wrap">
+                                    <div class="layui-input-prefix">
+                                        <i class="layui-icon layui-icon-date"></i>
+                                    </div>
+                                    <input type="text" name="invokeTimeStart" id="invokeTimeStart" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-input-inline layui-input-wrap">
+                                    <div class="layui-input-prefix">
+                                        <i class="layui-icon layui-icon-date"></i>
+                                    </div>
+                                    <input type="text" name="invokeTimeEnd" id="invokeTimeEnd" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
                         </div>
-                        <input type="text" name="invokeTimeEnd" id="invokeTimeEnd" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                        <div class="layui-form-item form-btn">
+                            <input type="button" class="layui-btn" id="traceForm" value="查询">
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </div>
+                    </form>
+                    <table class="layui-table trace-table" th:fragment="walkingCompeteList">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>traceId</th>
+                                <th>链路的起点</th>
+                                <th>链路的终点</th>
+                                <th>起点所在的服务名称</th>
+                                <th>开始调用的时间</th>
+                                <th>耗时(ms)</th>
+                                <th>总链路数</th>
+                                <th>调用的方法数</th>
+                                <th>链路调用的用户</th>
+                                <th>是否有异常</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="walkingCompete,status: ${walkingCompeteList}">
+                                <td th:text="${status.index+1}"></td>
+                                <td th:inline="text">[[${walkingCompete.traceId}]]<a href="javascript:void(0);" class="a-btn" th:data="${walkingCompete.traceId}">[详细信息]</a></td>
+                                <td th:text="${walkingCompete.traceStartPos}"></td>
+                                <td th:text="${walkingCompete.traceEndPos}" th:class="${walkingCompete.exceptionFlag} ? 'td-waring' : ''"></td>
+                                <td th:text="${walkingCompete.applicationName}"></td>
+                                <td th:text="${#dates.format(walkingCompete.traceStartTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                <td th:text="${walkingCompete.traceTimeConsume}"></td>
+                                <td th:text="${walkingCompete.traceSum}"></td>
+                                <td th:text="${walkingCompete.invokeMethodSum}"></td>
+                                <td th:inline="text">
+                                    用户 ID： [[${walkingCompete.userId}]]<br>
+                                    用户姓名： [[${walkingCompete.userName}]]
+                                </td>
+                                <td th:text="${walkingCompete.exceptionFlag} ? '是' : '否'"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="layui-card-body">
+                    <div class="content-bottom" id="method-active">
+                        <p class="title-p"><span>方法调用的活跃程度</span></p>
+                        <ul class="title-ul">
+                            <li class="li-default" data-type="list">列表</li>
+                            <li data-type="pie">饼状图</li>
+                        </ul>
+                        <form class="layui-form method-form">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">统计的方法数限制：</label>
+                                    <div class="layui-input-inline">
+                                        <select name="topSum">
+                                            <option value="5" selected>5个</option>
+                                            <option value="10">10个</option>
+                                            <option value="15">15</option>
+                                            <option value="20">20个</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">方法活跃度排序：</label>
+                                    <div class="layui-input-inline">
+                                        <select name="activation">
+                                            <option value="LOW" selected>由低到高</option>
+                                            <option value="HIGH">由高到低</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">方法类名：</label>
+                                    <div class="layui-input-inline width-300">
+                                        <input type="text" name="className" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">方法名称：</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="methodName" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">方法调用的日期：</label>
+                                    <div class="layui-input-inline layui-input-wrap">
+                                        <div class="layui-input-prefix"> <i class="layui-icon layui-icon-date"></i></div>
+                                        <input type="text" name="invokeTimeStart" id="timeStart"
+                                               autocomplete="off" class="layui-input" th:value="${#dates.format(methodInvokeDto.invokeTimeStart, 'yyyy-MM-dd')}">
+                                    </div>
+                                    <div class="layui-input-inline layui-input-wrap">
+                                        <div class="layui-input-prefix"><i class="layui-icon layui-icon-date"></i></div>
+                                        <input type="text" name="invokeTimeEnd" id="timeEnd"
+                                               autocomplete="off" class="layui-input" th:value="${#dates.format(methodInvokeDto.invokeTimeEnd, 'yyyy-MM-dd')}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item form-btn">
+                                <input type="button" class="layui-btn" id="methodForm" value="查询">
+                                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </form>
+                        <div class="method-data-list">
+                            <table class="layui-table method-table" th:fragment="methdStatList">
+                                <thead>
+                                    <tr>
+                                        <th>方法所在类名</th>
+                                        <th>方法名称</th>
+                                        <th>调用的次数</th>
+                                    </tr>
+                                </thead>
+                                <tbody th:data="${methodStatListJson}">
+                                    <tr th:each="methodStat: ${methodStatList}">
+                                        <td th:text="${methodStat.className}"></td>
+                                        <td th:text="${methodStat.methodName}" ></td>
+                                        <td th:text="${methodStat.invokeCount}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="pie-container"></div>
                     </div>
                 </div>
             </div>
-            <div class="layui-form-item form-btn">
-                <input type="button" class="layui-btn" id="traceForm" value="查询">
-                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
-            </div>
-        </form>
-        <table class="layui-table" th:fragment="walkingCompeteList">
-            <thead>
-                <tr>
-                    <th>序号</th>
-                    <th>traceId</th>
-                    <th>链路的起点</th>
-                    <th>链路的终点</th>
-                    <th>起点所在的服务名称</th>
-                    <th>开始调用的时间</th>
-                    <th>耗时(ms)</th>
-                    <th>总链路数</th>
-                    <th>调用的方法数</th>
-                    <th>链路调用的用户</th>
-                    <th>是否有异常</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="walkingCompete,status: ${walkingCompeteList}">
-                    <td th:text="${status.index+1}"></td>
-                    <td th:inline="text">[[${walkingCompete.traceId}]]<a href="javascript:void(0);" class="a-btn" th:data="${walkingCompete.traceId}">[详细信息]</a></td>
-                    <td th:text="${walkingCompete.traceStartPos}"></td>
-                    <td th:text="${walkingCompete.traceEndPos}" th:class="${walkingCompete.exceptionFlag} ? 'td-waring' : ''"></td>
-                    <td th:text="${walkingCompete.applicationName}"></td>
-                    <td th:text="${#dates.format(walkingCompete.traceStartTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${walkingCompete.traceTimeConsume}"></td>
-                    <td th:text="${walkingCompete.traceSum}"></td>
-                    <td th:text="${walkingCompete.invokeMethodSum}"></td>
-                    <td th:inline="text">
-                        用户 ID： [[${walkingCompete.userId}]]<br>
-                        用户姓名： [[${walkingCompete.userName}]]
-                    </td>
-                    <td th:text="${walkingCompete.exceptionFlag} ? '是' : '否'"></td>
-                </tr>
-            </tbody>
-        </table>
+        </div>
     </div>
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        <a href="https://github.com/simonkingws/webconfig-springboot" target="_blank">【去Github链接，支持一下！】</a>
+        <a href="https://blog.csdn.net/static_coder" target="_blank">【去技术博客查看更多！】</a>
+    </div>
+</div>
 </body>
 <script th:src="@{/js/jqery-3.7.1.js}"></script>
 <script th:src="@{/js/echarts.min-5.5.0.js}"></script>
@@ -135,9 +268,13 @@
 <script th:src="@{/js/common.js}"></script>
 <script type="text/javascript" th:inline="javascript">
     $(function (){
+        // 初始化Graph
+        initGraph();
+
         // tab 切换
-        $(".title-ul").find("li").click(function (){
-            $(".title-ul").find("li").each(function (){
+        $("#server-stat, #method-active").find(".title-ul li").click(function (){
+            let idName = $(this).parents(".content-bottom").attr("id");
+            $(this).parent().find("li").each(function (){
                 $(this).removeClass("li-default");
             });
 
@@ -145,36 +282,76 @@
             $(this).attr("class","li-default");
             let dataType = $(this).attr("data-type");
             if (dataType === "list") {
-                $(".data-list").show();
-                $("#chart-container").hide();
+                if (idName === "server-stat") {
+                    $(".server-data-list").show();
+                    $("#chart-container").hide();
+                }else{
+                    $(".method-data-list").show();
+                    $("#pie-container").hide();
+                }
             }else if (dataType === "histogram") {
-                $(".data-list").hide();
-                $("#chart-container").show();
+                $(".server-data-list").hide();
                 // 初始化方法
+                $("#chart-container").show();
                 initChart([[${serverHistogram}]]);
+            }else {
+                $(".method-data-list").hide();
+                // 初始化方法
+                $("#pie-container").show();
+                // 增加锚点
+                $("html,body").animate({scrollTop: $("#pie-container").offset().top - 70}, 800);
+
+
+                let dataList = [[${methodStatList}]];
+                let dataJson = $(".method-table").find("tbody").attr("data");
+                if (!$.isEmptyObject(dataJson)) {
+                    dataList = eval(dataJson);
+                }
+                initPie(dataList);
             }
         });
-
-        // 初始化Graph
-        initGraph();
 
         // 初始化表单
         layui.use(['laydate'], function(){
             let laydate = layui.laydate;
-
             // 日期
             laydate.render({elem: '#invokeTimeStart'});
             laydate.render({elem: '#invokeTimeEnd'});
+
+            laydate.render({elem: '#timeStart'});
+            laydate.render({elem: '#timeEnd'});
+        });
+
+        // 锚点
+        $(".layui-side-scroll").find("a").click(function (){
+            let href = $(this).attr("href");
+            let pos = $(href).offset().top - 70;
+            $("html,body").animate({scrollTop: pos}, 800);
         });
 
         // 查询详细链路
         $("#traceForm").click(function (){
-            let serialize = $("form").serialize();
+            let serialize = $(".trace-form").serialize();
             let $input = $("input[name='exceptionFlag']:checked");
             if ($input.length > 1) {
                 serialize = serialize.replaceAll("exceptionFlag=true", "").replaceAll("exceptionFlag=false", "")
             }
-            $(".layui-table").load("/analyze/loadCompeteTopX?" + serialize);
+            $(".trace-table").load("/analyze/loadCompeteTopX?" + serialize);
+        });
+
+        // 筛选统计的方法
+        $("#methodForm").click(function (){
+            let serialize = $(".method-form").serialize();
+            $(".method-table").load("/analyze/loadMethodStat?" + serialize, function (response){
+                let dataType = $("#method-active").find(".title-ul li.li-default").attr("data-type");
+                if (dataType === "pie") {
+                    let dataJson = $(response).find("tbody").attr("data");
+                    if (!$.isEmptyObject(dataJson)) {
+                        let dataList = eval(dataJson);
+                        initPie(dataList);
+                    }
+                }
+            });
         });
 
         // 详情
@@ -342,6 +519,52 @@
                 option && myChart.setOption(option);
             }
         });
+    }
+
+    function initPie(objList){
+        // 初始化函数
+        let dataList = [];
+        $.each(objList, function(index, o){
+            let item = {};
+            item.name =  o.className + "." + o.methodName;
+            item.value = o.invokeCount;
+            dataList.push(item);
+        });
+
+        let chartDom = document.getElementById('pie-container');
+        let myChart = echarts.init(chartDom);
+        let option = {
+            title: {
+                text: '方法调用的活跃程度',
+                subtext: '被调用次数',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left'
+            },
+            series: [
+                {
+                    name: '方法调用次数',
+                    type: 'pie',
+                    radius: '50%',
+                    data: dataList,
+                    center: ['50%', '55%'],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+
+        option && myChart.setOption(option);
     }
 </script>
 </html>

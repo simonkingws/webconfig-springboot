@@ -74,8 +74,10 @@ public class LoginController {
         model.addAttribute("walkingCompeteList", competeList);
 
         // 加载方法的调用统计
-        List<MethodStatVO> methodStatList = traceWalkingMethodService.getMethodInvokeStat(MethodInvokeDTO.empty());
+        MethodInvokeDTO empty = MethodInvokeDTO.empty();
+        List<MethodStatVO> methodStatList = traceWalkingMethodService.getMethodInvokeStat(empty);
         model.addAttribute("methodStatList", methodStatList);
+        model.addAttribute("methodInvokeDto", empty);
         return "index";
     }
 

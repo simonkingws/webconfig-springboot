@@ -1,17 +1,12 @@
-body {
-    margin: 10px 30px;
-    padding: 0;
-    background: url("/image/backgroud-index.jpg") no-repeat center center fixed;
-    background-size: cover;
-}
 .content-bottom{
-    margin-bottom: 50px;
+    margin: 10px;
 }
 p{
     margin: 15px 0;
     font-size: 16px;
     border-bottom: 1px solid #16baaa;
     padding-bottom: 8px;
+    margin-left: -10px;
 }
 p span {
     padding: 10px 10px;
@@ -39,6 +34,8 @@ p span {
     text-align: center;
     cursor: pointer;
     width: 100px;
+}
+#server-stat .title-ul li{
     border-bottom: 1px solid #d2d2d2;
 }
 td ul {
@@ -72,6 +69,11 @@ td ul label {
     overflow: hidden;
     max-height: 500px;
 }
+#pie-container {
+    height: 100vh;
+    overflow: hidden;
+    margin-top: 15px;
+}
 .content-title{
     font-size: 18px;
     text-align: center;
@@ -91,4 +93,20 @@ td ul label {
 }
 .td-waring{
     color: coral;
+}
+.layui-div-padding{
+    padding: 15px;
+}
+.title-p{
+    padding-bottom: 6px;
+    margin-left: -25px;
+}
+.method-data-list{
+    min-height: 550px;
+    margin-top: 15px;
+}
+form{
+    border: 1px solid #d2d2d2;
+    padding-top: 10px;
+    margin-top: -8px;
 }

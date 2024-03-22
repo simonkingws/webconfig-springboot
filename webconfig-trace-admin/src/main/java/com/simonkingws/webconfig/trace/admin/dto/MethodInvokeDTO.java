@@ -24,6 +24,9 @@ public class MethodInvokeDTO implements Serializable {
     /** 调用时间：结束时间 */
     private Date invokeTimeEnd;
 
+    /** 调用方法类名 */
+    private String className;
+
     /** 调用方法 */
     private String methodName;
 

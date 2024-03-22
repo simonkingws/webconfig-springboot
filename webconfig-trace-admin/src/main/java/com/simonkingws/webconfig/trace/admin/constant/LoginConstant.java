@@ -9,7 +9,7 @@ package com.simonkingws.webconfig.trace.admin.constant;
 public interface LoginConstant {
     
     /** 登录状态的常量 */
-    String LOGIN_USER = "login:user";
+    String LOGIN_USER = "login_user";
 
     /** 登录状态的常量 */
     String ENCRYPT_PWS = "******";

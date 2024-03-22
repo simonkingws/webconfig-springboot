@@ -28,7 +28,7 @@
         GROUP BY m.method_name, m.class_name
         ORDER BY invokeCount
         <if test="activation != null and activation='HIGH'">
-            ASC
+            DESC
         </if>
         LIMIT #{topSum}
     </select>

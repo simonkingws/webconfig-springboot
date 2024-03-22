@@ -14,7 +14,7 @@
             <li class="layui-nav-item layui-hide layui-show-sm-inline-block">
                 <a href="javascript:;">
                     <img src="//unpkg.com/outeres@0.0.10/img/layui/icon-v2.png" class="layui-nav-img">
-                    tester
+                    [[${session.login_user.username}]]
                 </a>
                 <dl class="layui-nav-child">
                     <dd><a href="javascript:void(0);">注销</a></dd>
@@ -367,7 +367,7 @@
                     $.each(resp.data, function (index, item){
                         htm += "<div class=\"layui-timeline-item\">";
                         if (index === 0 || resp.data.length === 1) {
-                            if (item.methodName.indexOf("java.lang.Throwable:") >= 0) {
+                            if (item.exceptionFlag) {
                                 htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-face-cry\"></i>";
                             }else{
                                 htm += "<i class=\"layui-icon layui-timeline-axis layui-icon-face-smile\"></i>";
@@ -383,23 +383,27 @@
                         htm += "<ul>";
                         htm += "<li>";
                         htm += "<label>调用顺序：</label>";
-                        htm += "<span>" + item.invokeOrder + "</span>";
+                        htm += "<span>" + (item.invokeOrder + 1) + "</span>";
                         htm += "</li>";
                         htm += "<li>";
                         htm += "<label>spanId：</label>";
                         htm += "<span>" + item.spanId + "</span>";
                         htm += "</li>";
                         htm += "<li>";
+                        htm += "<label>服务依赖：</label>";
+                        htm += "<span>" + item.consumerServerName +" -> "+ item.providerServerName + "</span>";
+                        htm += "</li>";
+                        htm += "<li>";
+                        htm += "<label>调用的方法：</label>";
+                        htm += "<span>" + item.className + "." + item.methodName + "</span>";
+                        htm += "</li>";
+                        htm += "<li>";
                         htm += "<label>方法耗时(ms)：</label>";
                         htm += "<span>" + item.methodTimeConsume + "</span>";
                         htm += "</li>";
                         htm += "<li>";
-                        htm += "<label>调用的方法：</label>";
-                        htm += "<span>" + item.methodName + "</span>";
-                        htm += "</li>";
-                        htm += "<li>";
-                        htm += "<label>服务依赖：</label>";
-                        htm += "<span>" + item.consumerServerName +" -> "+ item.providerServerName + "</span>";
+                        htm += "<label>请求的入口URL：</label>";
+                        htm += "<span>" + item.requestUrl + "</span>";
                         htm += "</li>";
                         htm += "</ul>";
                         htm += "</div>";

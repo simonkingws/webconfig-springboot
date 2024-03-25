@@ -52,7 +52,11 @@ public class TraceWalkingServerServiceImpl implements TraceWalkingServerService 
                     one.setCreatedTime(new Date());
                     one.setUpdatedTime(new Date());
 
-                    traceWalkingServerMapper.insert(one);
+                    try {
+                        traceWalkingServerMapper.insert(one);
+                    }catch (Exception e){
+                        log.warn("traceWalkingServer 插入数据库数据可能存在重复的唯一键：", e);
+                    }
                 }else {
                     one.setUpdatedTime(new Date());
 

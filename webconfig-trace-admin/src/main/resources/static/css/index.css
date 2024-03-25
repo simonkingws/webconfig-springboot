@@ -1,12 +1,14 @@
+body{
+    background-color: dimgray;
+}
 .content-bottom{
     margin: 10px;
 }
 p{
-    margin: 15px 0;
     font-size: 16px;
     border-bottom: 1px solid #16baaa;
     padding-bottom: 8px;
-    margin-left: -10px;
+    margin: 15px 0 15px -10px;
 }
 p span {
     padding: 10px 10px;
@@ -41,7 +43,7 @@ p span {
 td ul {
     border: 1px solid #16baaa;
     padding: 5px 15px;
-    max-width: 600px;
+    width: auto;
 }
 td ul li {
     margin-top: 5px !important;

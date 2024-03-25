@@ -124,8 +124,22 @@ public class LoginController {
         user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
         user.setEnable(true);
         user.setCreatedTime(new Date());
+        user.setUpdatedTime(new Date());
 
         traceWalkingUserService.insert(user);
+        return JsonResult.ofSuccess();
+    }
+
+    /**
+     * 用户注销
+     *
+     * @author ws
+     * @date 2024/3/25 9:38
+     */
+    @PostMapping("/logout")
+    @ResponseBody
+    public JsonResult<?> logout(HttpServletRequest request) {
+        request.getSession().removeAttribute(LoginConstant.LOGIN_USER);
         return JsonResult.ofSuccess();
     }
 }

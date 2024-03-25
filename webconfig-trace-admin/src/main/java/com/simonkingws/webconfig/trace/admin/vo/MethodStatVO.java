@@ -3,6 +3,7 @@ package com.simonkingws.webconfig.trace.admin.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 调用方法的统计
@@ -21,5 +22,8 @@ public class MethodStatVO implements Serializable {
     private String methodName;
     /** 方法调用的次数 */
     private Long invokeCount;
+
+    /** 方法调用的次数 */
+    private Date invokeTime;
 
 }

@@ -2,7 +2,6 @@ package com.simonkingws.webconfig.trace.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.simonkingws.webconfig.common.constant.SymbolConstant;
 import com.simonkingws.webconfig.common.constant.TraceConstant;
 import com.simonkingws.webconfig.common.context.TraceItem;
 import com.simonkingws.webconfig.trace.admin.constant.SqlFieldConstant;
@@ -15,6 +14,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +45,7 @@ public class TraceWalkingCompeteServiceImpl implements TraceWalkingCompeteServic
         compete.setTraceId(traceItem.getTraceId());
         compete.setTraceStartTime(new Date(traceItem.getSpanId()));
         compete.setApplicationName(traceItem.getConsumerApplicatName());
-        compete.setTraceStartPos(traceItem.getClassName() + SymbolConstant.DOT + traceItem.getMethodName());
+        compete.setTraceStartPos(traceItem.getMethodName());
         compete.setRequestUrl(traceItem.getRequestUrl());
 
         // 解析链路的出口数据
@@ -83,6 +85,12 @@ public class TraceWalkingCompeteServiceImpl implements TraceWalkingCompeteServic
 
     @Override
     public List<TraceWalkingCompete> getCompeteByCondition(TraceWalkingDTO traceWalkingDto) {
+        Date invokeTimeEnd = traceWalkingDto.getInvokeTimeEnd();
+        if (invokeTimeEnd != null) {
+            LocalDateTime localDateTime = invokeTimeEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().with(LocalTime.MAX);
+            traceWalkingDto.setInvokeTimeEnd(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+        }
+
         LambdaQueryWrapper<TraceWalkingCompete> queryWrapper = Wrappers.lambdaQuery(TraceWalkingCompete.class)
                 .eq(StringUtils.isNoneBlank(traceWalkingDto.getTraceId()), TraceWalkingCompete::getTraceId, traceWalkingDto.getTraceId())
                 .eq(traceWalkingDto.getExceptionFlag() != null, TraceWalkingCompete::getExceptionFlag, traceWalkingDto.getExceptionFlag())

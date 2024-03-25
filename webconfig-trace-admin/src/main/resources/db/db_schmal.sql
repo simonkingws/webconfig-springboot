@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS `trace_walking_user` (
   `password` varchar(50) NOT NULL COMMENT '密码',
   `enable` tinyint(1) DEFAULT '1' COMMENT '是否有效（0：注销 1：有效）',
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='链路登录用户信息';

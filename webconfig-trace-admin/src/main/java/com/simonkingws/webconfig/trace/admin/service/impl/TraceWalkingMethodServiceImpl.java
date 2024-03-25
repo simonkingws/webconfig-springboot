@@ -16,6 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -87,6 +90,11 @@ public class TraceWalkingMethodServiceImpl implements TraceWalkingMethodService 
     public List<MethodStatVO> getMethodInvokeStat(MethodInvokeDTO methodInvokeDto) {
         if (methodInvokeDto.getTopSum() == null) {
             methodInvokeDto.setTopSum(5);
+        }
+        Date invokeTimeEnd = methodInvokeDto.getInvokeTimeEnd();
+        if (invokeTimeEnd != null) {
+            LocalDateTime localDateTime = invokeTimeEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().with(LocalTime.MAX);
+            methodInvokeDto.setInvokeTimeEnd(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
         }
         return traceWalkingMethodMapper.getMethodInvokeStat(methodInvokeDto);
     }

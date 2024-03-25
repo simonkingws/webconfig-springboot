@@ -8,6 +8,8 @@ import com.simonkingws.webconfig.trace.admin.service.TraceWalkingUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 /**
  * <p>
  * 链路登录用户信息 服务实现类
@@ -38,6 +40,7 @@ public class TraceWalkingUserServiceImpl implements TraceWalkingUserService {
     @Override
     public void disabledUser(TraceWalkingUser user) {
         user.setEnable(false);
+        user.setUpdatedTime(new Date());
         traceWalkingUserMapper.updateByPrimaryKey(user);
     }
 }

@@ -49,4 +49,9 @@ public class TraceWalkingUser implements Serializable {
      * 创建时间
      */
     private Date createdTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updatedTime;
 }

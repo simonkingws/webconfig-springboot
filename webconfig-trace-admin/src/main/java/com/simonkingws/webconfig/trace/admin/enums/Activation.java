@@ -14,8 +14,10 @@ import lombok.Getter;
 public enum Activation {
 
     /** 活跃度高 */
-    HIGH,
+    HIGH(1),
 
     /** 活跃度低 */
-    LOW
+    LOW(2);
+
+    private final Integer code;
 }

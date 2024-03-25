@@ -13,6 +13,7 @@
         SELECT
             m.class_name as className,
             m.method_name as methodName,
+            MAX(m.method_start_time) as invokeTime,
             COUNT(*) as invokeCount
         FROM trace_walking_method m
         WHERE m.exception_flag = 0
@@ -22,12 +23,15 @@
         <if test="invokeTimeEnd != null">
             <![CDATA[ AND m.method_start_time <= #{invokeTimeEnd}]]>
         </if>
+        <if test="className != null and className != ''">
+            AND m.class_name = #{className}
+        </if>
         <if test="methodName != null and methodName != ''">
             AND m.method_name = #{methodName}
         </if>
         GROUP BY m.method_name, m.class_name
         ORDER BY invokeCount
-        <if test="activation != null and activation='HIGH'">
+        <if test="activation != null and activation.code == 1">
             DESC
         </if>
         LIMIT #{topSum}

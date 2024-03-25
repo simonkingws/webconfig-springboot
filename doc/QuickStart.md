@@ -291,8 +291,17 @@ public class WebconfigProperies {
     /**
      * arthas 是否开启,默认关闭。关闭状态可以使用arthas的原生配置
      */
-    private Boolean arthasOpen = false;
+    private Boolean arthasOpen = false;    /**
+     
+     * arthas 是否开启,默认关闭。关闭状态可以使用arthas的原生配置
+     */
+    private Boolean arthasIsSelfConfig = false;
 
+    /**
+     * arthas ip
+     */
+    private String arthasIp = "0.0.0.0";
+    
     /**
      * arthas 服务唯一标识：默认是为空，系统自动生成。
      * <pre>

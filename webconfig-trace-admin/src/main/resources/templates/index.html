@@ -17,8 +17,8 @@
                     [[${session.login_user.username}]]
                 </a>
                 <dl class="layui-nav-child">
-                    <dd><a href="javascript:void(0);">注销</a></dd>
-                    <dd><a href="javascript:void(0);">登出</a></dd>
+                    <dd onclick="logOff();"><a href="javascript:void(0);">注销</a></dd>
+                    <dd onclick="logout();"><a href="javascript:void(0);">登出</a></dd>
                 </dl>
             </li>
         </ul>
@@ -186,7 +186,7 @@
                                         <select name="topSum">
                                             <option value="5" selected>5个</option>
                                             <option value="10">10个</option>
-                                            <option value="15">15</option>
+                                            <option value="15">15个</option>
                                             <option value="20">20个</option>
                                         </select>
                                     </div>
@@ -238,6 +238,7 @@
                                         <th>方法所在类名</th>
                                         <th>方法名称</th>
                                         <th>调用的次数</th>
+                                        <th>最新调用的时间</th>
                                     </tr>
                                 </thead>
                                 <tbody th:data="${methodStatListJson}">
@@ -245,6 +246,7 @@
                                         <td th:text="${methodStat.className}"></td>
                                         <td th:text="${methodStat.methodName}" ></td>
                                         <td th:text="${methodStat.invokeCount}"></td>
+                                        <td th:text="${#dates.format(methodStat.invokeTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -363,7 +365,7 @@
             }
             $.get("/analyze/traceDetail", {"traceId": $(this).attr("data")}, function (resp){
                 if (resp.success) {
-                    let htm = "<tr class=\"trace\"><td colspan=\"10\">";
+                    let htm = "<tr class=\"trace\"><td colspan=\"11\">";
                     $.each(resp.data, function (index, item){
                         htm += "<div class=\"layui-timeline-item\">";
                         if (index === 0 || resp.data.length === 1) {
@@ -419,6 +421,24 @@
             });
         });
     });
+
+    // 注销
+    function logOff(){
+        $.post("/user/disabledUser", {}, function (resp){
+            if (resp.success) {
+                window.location.reload();
+            }
+        });
+    }
+
+    // 登出
+    function logout(){
+        $.post("/logout", {}, function (resp){
+            if (resp.success) {
+                window.location.reload();
+            }
+        });
+    }
 
     function initChart(objList) {
         // 初始化函数
